@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ICAO Aviation English Trainer</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #00ff88;
+    --green-dim: #00aa55;
+    --green-dark: #004422;
+    --bg: #060e08;
+    --bg2: #0a1a0c;
+    --bg3: #0d2010;
+    --border: #1a4a20;
+    --text: #c0e8c8;
+    --text-dim: #4a8a5a;
+    --red: #ff4444;
+    --orange: #ffaa44;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: '';
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,255,136,0.012) 3px, rgba(0,255,136,0.012) 4px);
+    pointer-events: none; z-index: 100;
+  }
+
+  /* HEADER */
+  header {
+    background: linear-gradient(135deg, var(--bg2), var(--bg3));
+    border-bottom: 2px solid var(--border);
+    padding: 14px 20px;
+    display: flex; align-items: center; justify-content: space-between;
+    box-shadow: 0 4px 30px rgba(0,200,80,0.1);
+    position: sticky; top: 0; z-index: 50;
+  }
+  .logo { display: flex; align-items: center; gap: 12px; }
+  .logo-icon {
+    width: 42px; height: 42px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,255,136,0.15), rgba(0,40,20,0.8));
+    border: 2px solid var(--green-dim);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    box-shadow: 0 0 15px rgba(0,200,80,0.4);
+    animation: pulse 2s infinite;
+  }
+  .logo-text { font-size: 17px; color: var(--green); letter-spacing: 3px; font-weight: bold; }
+  .logo-sub { font-size: 9px; color: var(--text-dim); letter-spacing: 2px; margin-top: 2px; }
+  .status {
+    background: var(--bg); border: 1px solid var(--border);
+    padding: 5px 12px; border-radius: 4px;
+    font-size: 10px; color: var(--green-dim); letter-spacing: 2px;
+  }
+
+  /* NAV */
+  nav {
+    display: flex; gap: 2px; padding: 10px 16px;
+    background: #050c07; border-bottom: 1px solid #0f2a12;
+    overflow-x: auto;
+  }
+  nav button {
+    padding: 9px 16px; border: none; border-radius: 4px;
+    cursor: pointer; font-family: 'Share Tech Mono', monospace;
+    font-size: 11px; letter-spacing: 1px; white-space: nowrap;
+    transition: all 0.2s; border-top: 2px solid transparent;
+    background: var(--bg2); color: var(--text-dim);
+  }
+  nav button.active {
+    background: var(--green-dim); color: #000; font-weight: bold;
+    border-top-color: var(--green);
+    box-shadow: 0 0 15px rgba(0,180,80,0.3);
+  }
+  nav button:hover:not(.active) { color: var(--green); border-top-color: var(--border); }
+
+  /* MAIN */
+  main { max-width: 900px; margin: 0 auto; padding: 20px 16px; }
+
+  /* API KEY BANNER */
+  .api-banner {
+    background: linear-gradient(135deg, #1a0a00, #2a1000);
+    border: 1px solid #aa4400; border-radius: 8px;
+    padding: 14px 16px; margin-bottom: 20px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .api-banner span { font-size: 12px; color: var(--orange); flex: 1; min-width: 200px; }
+  .api-banner input {
+    flex: 2; min-width: 200px; padding: 8px 12px;
+    background: #0a0500; border: 1px solid #aa4400; border-radius: 4px;
+    color: var(--orange); font-family: 'Share Tech Mono', monospace; font-size: 11px; outline: none;
+  }
+  .api-banner button {
+    padding: 8px 16px; background: #aa4400; border: none; border-radius: 4px;
+    color: #fff; font-family: 'Share Tech Mono', monospace; font-size: 11px;
+    cursor: pointer; letter-spacing: 1px;
+  }
+
+  /* RADIO MODULE */
+  .module-header { font-size: 12px; color: var(--text-dim); letter-spacing: 2px; margin-bottom: 14px; }
+  .radio-info {
+    background: var(--bg2); border: 1px solid var(--border); border-radius: 6px;
+    padding: 10px 14px; font-size: 11px; color: var(--text-dim); margin-bottom: 16px;
+    letter-spacing: 1px; display: flex; flex-wrap: wrap; gap: 12px;
+  }
+  .radio-info span { color: var(--green); }
+  .chat-window {
+    height: 360px; overflow-y: auto; padding: 14px;
+    background: #040c06; border: 1px solid var(--border); border-radius: 8px;
+    margin-bottom: 12px; display: flex; flex-direction: column; gap: 10px;
+    scrollbar-width: thin; scrollbar-color: var(--border) #040c06;
+  }
+  .msg { display: flex; flex-direction: column; }
+  .msg.user { align-items: flex-end; }
+  .msg.atc { align-items: flex-start; }
+  .bubble {
+    max-width: 82%; padding: 10px 14px; border-radius: 6px;
+    font-size: 12px; line-height: 1.7;
+  }
+  .msg.user .bubble {
+    background: linear-gradient(135deg, #0a3020, #0d4428);
+    border: 1px solid var(--green-dim); color: #88ffaa;
+    box-shadow: 0 0 10px rgba(0,170,68,0.15);
+  }
+  .msg.atc .bubble {
+    background: linear-gradient(135deg, var(--bg2), var(--bg3));
+    border: 1px solid var(--border); color: var(--text);
+  }
+  .msg-label { font-size: 9px; color: var(--green-dim); letter-spacing: 2px; margin-bottom: 4px; }
+  .typing { color: var(--text-dim); font-size: 11px; }
+  @keyframes blink { 0%,100%{opacity:1}50%{opacity:0} }
+  .blink { animation: blink 1s infinite; }
+
+  .radio-input-row { display: flex; gap: 8px; }
+  .radio-input {
+    flex: 1; padding: 11px 14px;
+    background: var(--bg2); border: 1px solid var(--green-dark); border-radius: 6px;
+    color: var(--green); font-family: 'Share Tech Mono', monospace; font-size: 12px;
+    outline: none; letter-spacing: 1px;
+    transition: border-color 0.2s;
+  }
+  .radio-input:focus { border-color: var(--green-dim); }
+  .radio-input::placeholder { color: var(--text-dim); }
+  .transmit-btn {
+    padding: 11px 18px; border: none; border-radius: 6px;
+    font-family: 'Share Tech Mono', monospace; font-size: 12px;
+    font-weight: bold; cursor: pointer; letter-spacing: 1px; transition: all 0.2s;
+    background: var(--green-dim); color: #000;
+  }
+  .transmit-btn:disabled { background: #0a2010; color: #2a5a3a; cursor: not-allowed; }
+  .hint { margin-top: 8px; font-size: 10px; color: #2a5a3a; letter-spacing: 1px; }
+
+  /* VOCAB */
+  .cat-tabs { display: flex; gap: 6px; margin-bottom: 18px; flex-wrap: wrap; }
+  .cat-tab {
+    padding: 7px 14px; border: none; border-radius: 4px; cursor: pointer;
+    font-family: 'Share Tech Mono', monospace; font-size: 10px; letter-spacing: 1px;
+    transition: all 0.2s;
+    background: var(--bg2); color: var(--text-dim); border: 1px solid var(--border);
+  }
+  .cat-tab.active { background: var(--green-dim); color: #000; border-color: var(--green); }
+  .vocab-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
+  .vocab-card {
+    padding: 18px; border-radius: 8px; cursor: pointer; min-height: 110px;
+    display: flex; flex-direction: column; justify-content: center;
+    transition: all 0.3s; border: 1px solid var(--border);
+    background: linear-gradient(135deg, var(--bg2), var(--bg3));
+  }
+  .vocab-card:hover { border-color: var(--green-dim); }
+  .vocab-card.flipped {
+    background: linear-gradient(135deg, #0a3020, #0d4428);
+    border-color: var(--green-dim);
+    box-shadow: 0 0 20px rgba(0,170,68,0.2);
+  }
+  .card-label { font-size: 9px; color: var(--text-dim); letter-spacing: 2px; margin-bottom: 8px; }
+  .card-main { font-size: 15px; color: #88ffaa; font-weight: bold; }
+  .card-sub { font-size: 13px; color: var(--text); margin: 8px 0 4px; }
+  .card-phonetic { font-size: 12px; color: var(--green); font-style: italic; }
+  .card-hint { margin-top: 10px; font-size: 9px; color: var(--text-dim); }
+
+  .phonetic-box {
+    margin-top: 22px; padding: 16px;
+    background: #040c06; border: 1px solid var(--border); border-radius: 8px;
+  }
+  .phonetic-box .box-title { font-size: 10px; color: var(--text-dim); letter-spacing: 2px; margin-bottom: 12px; }
+  .phonetic-list { display: flex; flex-wrap: wrap; gap: 6px; }
+  .phonetic-item {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 3px; padding: 4px 8px; font-size: 10px; color: var(--text-dim);
+  }
+  .phonetic-item .letter { color: var(--green); }
+
+  /* EMERGENCY */
+  .emg-alert {
+    padding: 12px 16px; background: #1a0800; border: 1px solid #aa3300;
+    border-radius: 6px; margin-bottom: 18px; font-size: 11px; color: #ff8866; letter-spacing: 1px;
+  }
+  .emg-tabs { display: flex; gap: 6px; margin-bottom: 18px; flex-wrap: wrap; }
+  .emg-tab {
+    padding: 7px 12px; border: none; border-radius: 4px; cursor: pointer;
+    font-family: 'Share Tech Mono', monospace; font-size: 10px; letter-spacing: 1px;
+    background: #1a0800; color: #884422; border: 1px solid #4a1a00; transition: all 0.2s;
+  }
+  .emg-tab.active { background: #aa3300; color: #fff; border-color: #ff6644; }
+  .emg-scenario {
+    padding: 16px; background: #0d0400; border: 1px solid #aa3300;
+    border-radius: 8px; margin-bottom: 14px;
+  }
+  .emg-label { font-size: 9px; color: #884422; letter-spacing: 2px; margin-bottom: 8px; }
+  .emg-title { font-size: 15px; color: #ff8866; font-weight: bold; }
+  .emg-transmission {
+    padding: 16px; background: #0d0400; border: 2px solid #cc4400;
+    border-radius: 8px; margin-bottom: 14px;
+    box-shadow: 0 0 20px rgba(200,80,0,0.12);
+  }
+  .emg-text { font-size: 13px; color: #ffcc88; line-height: 1.8; letter-spacing: 1px; }
+  .tips-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+  .tip {
+    padding: 12px; background: #0a0a00; border: 1px solid #4a3a00;
+    border-radius: 6px; font-size: 11px; color: #ccaa44;
+    border-left: 3px solid #aa8800; line-height: 1.5;
+  }
+
+  /* EXAM */
+  .progress-bar {
+    height: 4px; background: var(--bg2); border-radius: 2px; margin-bottom: 20px; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; background: var(--green-dim); border-radius: 2px;
+    transition: width 0.3s; box-shadow: 0 0 8px rgba(0,200,80,0.4);
+  }
+  .exam-meta { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-dim); margin-bottom: 18px; }
+  .exam-q {
+    padding: 20px; background: #040c06; border: 1px solid var(--border);
+    border-radius: 8px; margin-bottom: 16px; font-size: 14px;
+    color: #88ffaa; line-height: 1.7;
+  }
+  .options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
+  .option {
+    padding: 13px 16px; border-radius: 6px; cursor: pointer; text-align: left;
+    font-family: 'Share Tech Mono', monospace; font-size: 12px; transition: all 0.3s;
+    background: var(--bg2); border: 1px solid var(--border); color: var(--text);
+    letter-spacing: 0.5px;
+  }
+  .option:hover:not(:disabled) { border-color: var(--green-dim); color: var(--green); }
+  .option.correct { background: #0a3020; border-color: var(--green); color: var(--green); }
+  .option.wrong { background: #1a0808; border-color: var(--red); color: #ff8888; }
+  .option:disabled { cursor: default; }
+  .opt-letter { opacity: 0.4; margin-right: 10px; }
+  .explanation {
+    padding: 14px; background: var(--bg2); border: 1px solid #1a6a2a;
+    border-radius: 6px; font-size: 11px; color: #88cc88; line-height: 1.7;
+    margin-bottom: 16px; border-left: 3px solid var(--green-dim);
+  }
+  .next-btn {
+    width: 100%; padding: 14px; background: var(--green-dim); border: none;
+    border-radius: 6px; color: #000; font-family: 'Share Tech Mono', monospace;
+    font-size: 13px; font-weight: bold; cursor: pointer; letter-spacing: 2px;
+    transition: all 0.2s;
+  }
+  .next-btn:hover { background: var(--green); }
+  .result-box {
+    padding: 40px; text-align: center; background: #040c06;
+    border: 2px solid var(--green-dim); border-radius: 12px;
+  }
+  .result-emoji { font-size: 56px; margin-bottom: 16px; }
+  .result-score { font-size: 36px; color: var(--green); margin-bottom: 8px; }
+  .result-msg { font-size: 13px; color: var(--text-dim); margin-bottom: 28px; }
+  .restart-btn {
+    padding: 12px 28px; background: var(--green-dim); border: none;
+    border-radius: 6px; color: #000; font-family: 'Share Tech Mono', monospace;
+    font-size: 13px; font-weight: bold; cursor: pointer; letter-spacing: 2px;
+  }
+
+  @keyframes pulse { 0%,100%{box-shadow:0 0 12px rgba(0,200,80,0.3)} 50%{box-shadow:0 0 24px rgba(0,200,80,0.6)} }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+  .fade-in { animation: fadeIn 0.3s ease; }
+
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: #040c06; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">✈️</div>
+    <div>
+      <div class="logo-text">ICAO ENGLISH TRAINER</div>
+      <div class="logo-sub">AVIATION ENGLISH • LEVEL 4 PREPARATION</div>
+    </div>
+  </div>
+  <div class="status">● SYSTEM ACTIVE</div>
+</header>
+
+<nav>
+  <button class="active" onclick="showModule('radio', this)">📡 Radio Simulation</button>
+  <button onclick="showModule('vocab', this)">📖 Vocabulary</button>
+  <button onclick="showModule('emergency', this)">🚨 Emergency</button>
+  <button onclick="showModule('exam', this)">🎓 Exam Practice</button>
+</nav>
+
+<main>
+
+  <!-- API KEY BANNER -->
+  <div class="api-banner" id="apiBanner">
+    <span>🔑 Entrez votre clé API Anthropic pour activer le simulateur radio IA :</span>
+    <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-..." />
+    <button onclick="saveKey()">ENREGISTRER</button>
+  </div>
+
+  <!-- RADIO MODULE -->
+  <div id="module-radio" class="fade-in">
+    <div class="module-header">▸ RADIO PHRASEOLOGY SIMULATOR • Powered by AI ATC</div>
+    <div class="radio-info">
+      <span>🛩️ Callsign: <span>GOLF-ALPHA-BRAVO-CHARLIE-DELTA</span></span>
+      <span>🏙️ Airport: <span>DIAP (Abidjan)</span></span>
+      <span>📻 Freq: <span>118.300 MHz</span></span>
+    </div>
+    <div class="chat-window" id="chatWindow">
+      <div class="msg atc fade-in">
+        <div class="msg-label">🎙️ ATC TOWER:</div>
+        <div class="bubble">Good evening. Welcome to Aviation English Training Center. I am your ATC controller. When ready, state your callsign and request to taxi.</div>
+      </div>
+    </div>
+    <div class="radio-input-row">
+      <input class="radio-input" id="radioInput" placeholder="State your radio transmission in English..." onkeydown="if(event.key==='Enter') sendMessage()" />
+      <button class="transmit-btn" id="txBtn" onclick="sendMessage()">TRANSMIT →</button>
+    </div>
+    <div class="hint">💡 Essaie: "Abidjan Ground, Golf Alpha Bravo Charlie Delta, request taxi to runway..."</div>
+  </div>
+
+  <!-- VOCAB MODULE -->
+  <div id="module-vocab" style="display:none" class="fade-in">
+    <div class="module-header">▸ VOCABULARY BANK • Click cards to reveal translation</div>
+    <div class="cat-tabs" id="catTabs"></div>
+    <div class="vocab-grid" id="vocabGrid"></div>
+    <div class="phonetic-box">
+      <div class="box-title">📻 ICAO PHONETIC ALPHABET</div>
+      <div class="phonetic-list" id="phoneticList"></div>
+    </div>
+  </div>
+
+  <!-- EMERGENCY MODULE -->
+  <div id="module-emergency" style="display:none" class="fade-in">
+    <div class="module-header" style="color:#ff6644">▸ EMERGENCY PHRASEOLOGY • MAYDAY & PAN-PAN PROCEDURES</div>
+    <div class="emg-alert">⚠️ MAYDAY = Immediate danger to life &nbsp;|&nbsp; PAN-PAN = Urgency, no immediate danger &nbsp;|&nbsp; Both on 121.500 MHz</div>
+    <div class="emg-tabs" id="emgTabs"></div>
+    <div id="emgContent"></div>
+  </div>
+
+  <!-- EXAM MODULE -->
+  <div id="module-exam" style="display:none" class="fade-in">
+    <div class="module-header">▸ EXAM PRACTICE • ICAO LEVEL 4 STYLE QUESTIONS</div>
+    <div id="examContainer"></div>
+  </div>
+
+</main>
+
+<script>
+// =================== DATA ===================
+const VOCAB = {
+  "ATC Clearances": [
+    { en: "Cleared for takeoff", fr: "Autorisé au décollage", ph: "KLEERD for TAYK-awf" },
+    { en: "Runway in use", fr: "Piste en service", ph: "RUN-way in YOOZ" },
+    { en: "Hold short", fr: "Arrêtez avant la piste", ph: "HOHLD SHORT" },
+    { en: "Line up and wait", fr: "Alignez-vous et attendez", ph: "LYN up and WAYT" },
+    { en: "Wind shear alert", fr: "Alerte cisaillement de vent", ph: "WIND SHEER uh-LERT" },
+    { en: "Go around", fr: "Remise des gaz", ph: "GOH uh-ROWND" },
+  ],
+  "Weather": [
+    { en: "Scattered clouds", fr: "Nuages épars", ph: "SKAT-erd KLOWDZ" },
+    { en: "Visibility ten kilometers", fr: "Visibilité dix km", ph: "viz-ih-BIL-ih-tee TEN" },
+    { en: "Turbulence moderate", fr: "Turbulences modérées", ph: "TUR-byoo-lence MOD-er-it" },
+    { en: "CAVOK", fr: "Conditions VFR optimales", ph: "KAV-oh-KAY" },
+    { en: "Ceiling and visibility OK", fr: "Plafond et visibilité OK", ph: "SEE-ling and viz-ih-BIL-ih-tee" },
+  ],
+  "Navigation": [
+    { en: "Squawk ident", fr: "Appuyez sur ident", ph: "SKWAWK EYE-dent" },
+    { en: "Report passing", fr: "Signalez le passage", ph: "rih-PORT PAS-ing" },
+    { en: "Maintain flight level", fr: "Maintenez le niveau de vol", ph: "may-TAYN FLYT LEV-el" },
+    { en: "Direct to", fr: "Direct vers", ph: "dih-REKT TOO" },
+    { en: "Descend and maintain", fr: "Descendez et maintenez", ph: "dih-SEND and may-TAYN" },
+  ],
+  "Emergency": [
+    { en: "Mayday Mayday Mayday", fr: "Détresse — danger immédiat", ph: "MAY-day MAY-day MAY-day" },
+    { en: "Pan-Pan Pan-Pan Pan-Pan", fr: "Urgence — pas de danger immédiat", ph: "PAN-PAN PAN-PAN PAN-PAN" },
+    { en: "Declare emergency", fr: "Déclarer une urgence", ph: "dih-KLAIR ih-MER-jen-see" },
+    { en: "Minimum fuel", fr: "Carburant minimum", ph: "MIN-ih-mum FYOO-el" },
+    { en: "Request immediate descent", fr: "Demande descente immédiate", ph: "rih-KWEST ih-MEE-dee-it dih-SENT" },
+  ],
+};
+
+const PHONETICS = ["Alpha","Bravo","Charlie","Delta","Echo","Foxtrot","Golf","Hotel","India","Juliet","Kilo","Lima","Mike","November","Oscar","Papa","Quebec","Romeo","Sierra","Tango","Uniform","Victor","Whiskey","Xray","Yankee","Zulu"];
+
+const EMERGENCIES = [
+  {
+    title: "Engine Failure After Takeoff",
+    tx: "Mayday Mayday Mayday, Golf Alpha Bravo Charlie Delta, engine failure, request immediate return to [airport], [X] souls on board, [X] hours fuel endurance",
+    tips: ["Répétez Mayday 3 fois", "Précisez âmes à bord", "Donnez l'autonomie carburant", "Squawk 7700"]
+  },
+  {
+    title: "Medical Emergency",
+    tx: "Pan-Pan Pan-Pan Pan-Pan, Golf Alpha Bravo Charlie Delta, medical emergency on board, request priority handling, position [X], altitude [X], [X] souls on board",
+    tips: ["Pan-Pan = urgence (pas danger immédiat)", "Donnez position exacte", "Précisez nombre de personnes affectées", "Restez sur la fréquence"]
+  },
+  {
+    title: "Lost Communication",
+    tx: "If you read Golf Alpha Bravo Charlie Delta, squawk 7600, will proceed [destination] via [route] at [altitude]",
+    tips: ["Squawk 7600 = perte de communications", "Continuez vers destination prévue", "Attendez signaux lumineux en tour de contrôle", "Restez sur plan de vol"]
+  },
+];
+
+const QUESTIONS = [
+  {
+    q: "ATC says: 'Golf-Alpha-Bravo, descend to flight level one-five-zero.' What is the correct readback?",
+    opts: ["Descending to flight level one-five-zero, Golf-Alpha-Bravo", "Roger, Golf-Alpha-Bravo", "Copy that, going down to 150", "Affirm, Golf-Alpha-Bravo"],
+    correct: 0,
+    exp: "Always read back altitude/FL instructions in full with your callsign. 'Roger' alone only confirms receipt — it does NOT confirm compliance."
+  },
+  {
+    q: "What does 'WILCO' mean in aviation radio communication?",
+    opts: ["I have received your message", "I will comply with your instructions", "Wait, I will call you back", "Wind conditions OK"],
+    correct: 1,
+    exp: "WILCO = 'Will Comply'. It implies both receipt AND intent to follow the instruction. Different from 'Roger' which only confirms receipt."
+  },
+  {
+    q: "ATC says: 'Hold short of runway two-seven.' Where do you stop?",
+    opts: ["On the runway threshold", "Before the runway holding position markings (double yellow line)", "At the edge of the apron", "Anywhere before the runway"],
+    correct: 1,
+    exp: "Hold short = stop BEFORE the runway holding position markings. Never enter the runway without explicit clearance — this is a critical safety rule."
+  },
+  {
+    q: "Which squawk code indicates a hijacking?",
+    opts: ["7500", "7600", "7700", "1200"],
+    correct: 0,
+    exp: "7500 = Hijack | 7600 = Lost comms | 7700 = General emergency | 1200 = VFR (USA). Memorize these — they are always tested at ICAO Level 4."
+  },
+  {
+    q: "How do you say the number '9' in ICAO standard phonetics?",
+    opts: ["Nine", "Niner", "Neuf", "Nov"],
+    correct: 1,
+    exp: "'Niner' avoids confusion with the German word 'Nein' (No) on international frequencies. Always use ICAO number pronunciation."
+  },
+  {
+    q: "What is the correct way to read back a frequency assignment of 118.3 MHz?",
+    opts: ["One one eight point three", "118.3", "One-one-eight decimal three", "One-eighteen-three"],
+    correct: 0,
+    exp: "Frequencies are read digit by digit: 'one one eight decimal three'. Always read back frequency assignments in full."
+  },
+  {
+    q: "ATC says 'Roger'. What does this mean?",
+    opts: ["I will comply", "I have received all of your last transmission", "Correct", "Understood, proceed"],
+    correct: 1,
+    exp: "'Roger' = 'I have received all of your last transmission'. It does NOT mean compliance or acknowledgment of understanding."
+  },
+];
+
+// =================== STATE ===================
+let currentModule = 'radio';
+let chatHistory = [];
+let vocabCategory = Object.keys(VOCAB)[0];
+let flipped = {};
+let emgIndex = 0;
+let examIndex = 0;
+let examSelected = null;
+let examScore = 0;
+let examDone = false;
+let apiKey = localStorage.getItem('anthropic_key') || '';
+
+// =================== INIT ===================
+window.onload = () => {
+  updateApiBanner();
+  buildVocab();
+  buildEmergency();
+  buildExam();
+};
+
+function updateApiBanner() {
+  const banner = document.getElementById('apiBanner');
+  if (apiKey) {
+    banner.style.display = 'none';
+  } else {
+    banner.style.display = 'flex';
+  }
+}
+
+function saveKey() {
+  const val = document.getElementById('apiKeyInput').value.trim();
+  if (val.startsWith('sk-ant')) {
+    apiKey = val;
+    localStorage.setItem('anthropic_key', val);
+    updateApiBanner();
+    addMessage('atc', '✅ Clé API enregistrée ! Le simulateur radio IA est maintenant actif. Bonne session d\'entraînement !');
+  } else {
+    alert('Clé invalide. Elle doit commencer par sk-ant-...');
+  }
+}
+
+// =================== MODULE NAV ===================
+function showModule(id, btn) {
+  document.querySelectorAll('[id^="module-"]').forEach(el => el.style.display = 'none');
+  document.getElementById('module-' + id).style.display = 'block';
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// =================== RADIO ===================
+function addMessage(role, content) {
+  const window = document.getElementById('chatWindow');
+  const div = document.createElement('div');
+  div.className = `msg ${role === 'user' ? 'user' : 'atc'} fade-in`;
+  div.innerHTML = `
+    ${role === 'user' ? '<div class="msg-label">YOU (PILOT):</div>' : '<div class="msg-label">🎙️ ATC:</div>'}
+    <div class="bubble">${content.replace(/\n/g, '<br>')}</div>
+  `;
+  window.appendChild(div);
+  window.scrollTop = window.scrollHeight;
+}
+
+async function sendMessage() {
+  const input = document.getElementById('radioInput');
+  const btn = document.getElementById('txBtn');
+  const text = input.value.trim();
+  if (!text) return;
+
+  if (!apiKey) {
+    alert('Veuillez entrer votre clé API Anthropic en haut de la page.');
+    return;
+  }
+
+  addMessage('user', text);
+  chatHistory.push({ role: 'user', content: text });
+  input.value = '';
+  btn.disabled = true;
+  btn.textContent = '...';
+
+  // Typing indicator
+  const chatWin = document.getElementById('chatWindow');
+  const typing = document.createElement('div');
+  typing.className = 'typing blink';
+  typing.id = 'typingIndicator';
+  typing.textContent = '▌ ATC transmitting...';
+  chatWin.appendChild(typing);
+  chatWin.scrollTop = chatWin.scrollHeight;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 800,
+        system: `You are an ICAO-certified ATC trainer for a French student pilot preparing for ICAO Level 4 Aviation English exam.
+
+Rules:
+- Act as a realistic ATC controller at DIAP (Abidjan Airport, Côte d'Ivoire)
+- Student callsign: Golf-Alpha-Bravo-Charlie-Delta (small GA aircraft)
+- Respond ONLY as real ATC: short, precise, standard ICAO phraseology
+- After each ATC transmission, add a brief coaching note in French in parentheses (coaching: what was good, what to improve, correct ICAO phrase if needed)
+- Progress through realistic flight: taxi → takeoff → departure → en route → arrival → landing
+- Correct errors gently with proper phrasing
+- Keep ATC transmissions realistic and short`,
+        messages: chatHistory
+      })
+    });
+
+    const data = await res.json();
+    const reply = data.content?.[0]?.text || 'No response from ATC.';
+    chatHistory.push({ role: 'assistant', content: reply });
+
+    document.getElementById('typingIndicator')?.remove();
+    addMessage('atc', reply);
+  } catch (e) {
+    document.getElementById('typingIndicator')?.remove();
+    addMessage('atc', '⚠️ Erreur de connexion. Vérifiez votre clé API et réessayez.');
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'TRANSMIT →';
+}
+
+// =================== VOCAB ===================
+function buildVocab() {
+  const tabs = document.getElementById('catTabs');
+  tabs.innerHTML = Object.keys(VOCAB).map(cat =>
+    `<button class="cat-tab ${cat === vocabCategory ? 'active' : ''}" onclick="switchCat('${cat}', this)">${cat.toUpperCase()}</button>`
+  ).join('');
+  renderVocabGrid();
+
+  const pl = document.getElementById('phoneticList');
+  pl.innerHTML = PHONETICS.map((w, i) =>
+    `<span class="phonetic-item"><span class="letter">${String.fromCharCode(65+i)}</span>=${w}</span>`
+  ).join('');
+}
+
+function switchCat(cat, btn) {
+  vocabCategory = cat;
+  flipped = {};
+  document.querySelectorAll('.cat-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderVocabGrid();
+}
+
+function renderVocabGrid() {
+  const grid = document.getElementById('vocabGrid');
+  grid.innerHTML = VOCAB[vocabCategory].map((item, i) => `
+    <div class="vocab-card ${flipped[i] ? 'flipped' : ''}" onclick="flipCard(${i})">
+      ${!flipped[i] ? `
+        <div class="card-label">🇬🇧 ENGLISH</div>
+        <div class="card-main">${item.en}</div>
+        <div class="card-hint">→ Tap to reveal</div>
+      ` : `
+        <div class="card-label">🇫🇷 FRANÇAIS</div>
+        <div class="card-sub">${item.fr}</div>
+        <div class="card-label" style="margin-top:10px">🔊 PRONUNCIATION</div>
+        <div class="card-phonetic">[${item.ph}]</div>
+      `}
+    </div>
+  `).join('');
+}
+
+function flipCard(i) {
+  flipped[i] = !flipped[i];
+  renderVocabGrid();
+}
+
+// =================== EMERGENCY ===================
+function buildEmergency() {
+  const tabs = document.getElementById('emgTabs');
+  tabs.innerHTML = EMERGENCIES.map((e, i) =>
+    `<button class="emg-tab ${i === emgIndex ? 'active' : ''}" onclick="switchEmg(${i}, this)">${e.title.toUpperCase().slice(0,20)}...</button>`
+  ).join('');
+  renderEmg();
+}
+
+function switchEmg(i, btn) {
+  emgIndex = i;
+  document.querySelectorAll('.emg-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderEmg();
+}
+
+function renderEmg() {
+  const e = EMERGENCIES[emgIndex];
+  document.getElementById('emgContent').innerHTML = `
+    <div class="emg-scenario">
+      <div class="emg-label">📋 SCENARIO</div>
+      <div class="emg-title">${e.title}</div>
+    </div>
+    <div class="emg-transmission">
+      <div class="emg-label">🎙️ STANDARD TRANSMISSION</div>
+      <div class="emg-text">${e.tx}</div>
+    </div>
+    <div class="tips-grid">
+      ${e.tips.map(t => `<div class="tip">✓ ${t}</div>`).join('')}
+    </div>
+  `;
+}
+
+// =================== EXAM ===================
+function buildExam() { renderExam(); }
+
+function renderExam() {
+  const container = document.getElementById('examContainer');
+  if (examDone) {
+    const emoji = examScore >= 6 ? '🏆' : examScore >= 4 ? '✈️' : '📚';
+    const msg = examScore >= 6 ? 'Excellent ! Niveau 4 en vue !' : examScore >= 4 ? 'Bon travail, continue à pratiquer !' : 'Continue à réviser, tu y arriveras !';
+    container.innerHTML = `
+      <div class="result-box">
+        <div class="result-emoji">${emoji}</div>
+        <div class="result-score">${examScore} / ${QUESTIONS.length}</div>
+        <div class="result-msg">${msg}</div>
+        <button class="restart-btn" onclick="restartExam()">RECOMMENCER →</button>
+      </div>
+    `;
+    return;
+  }
+
+  const q = QUESTIONS[examIndex];
+  const pct = (examIndex / QUESTIONS.length) * 100;
+  container.innerHTML = `
+    <div class="exam-meta">
+      <span>Question ${examIndex + 1} / ${QUESTIONS.length}</span>
+      <span>Score: ${examScore} pts</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+    <div class="exam-q">${q.q}</div>
+    <div class="options">
+      ${q.opts.map((opt, i) => {
+        let cls = 'option';
+        if (examSelected !== null) {
+          if (i === q.correct) cls += ' correct';
+          else if (i === examSelected && i !== q.correct) cls += ' wrong';
+        }
+        return `<button class="${cls}" ${examSelected !== null ? 'disabled' : ''} onclick="selectAnswer(${i})">
+          <span class="opt-letter">${['A','B','C','D'][i]}.</span>${opt}
+        </button>`;
+      }).join('')}
+    </div>
+    ${examSelected !== null ? `
+      <div class="explanation">💡 <strong>Explication:</strong> ${q.exp}</div>
+      <button class="next-btn" onclick="nextQuestion()">
+        ${examIndex + 1 >= QUESTIONS.length ? 'VOIR RÉSULTATS →' : 'QUESTION SUIVANTE →'}
+      </button>
+    ` : ''}
+  `;
+}
+
+function selectAnswer(i) {
+  if (examSelected !== null) return;
+  examSelected = i;
+  if (i === QUESTIONS[examIndex].correct) examScore++;
+  renderExam();
+}
+
+function nextQuestion() {
+  examIndex++;
+  examSelected = null;
+  if (examIndex >= QUESTIONS.length) examDone = true;
+  renderExam();
+}
+
+function restartExam() {
+  examIndex = 0; examSelected = null; examScore = 0; examDone = false;
+  renderExam();
+}
+</script>
+</body>
+</html>
