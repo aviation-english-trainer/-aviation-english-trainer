@@ -3,740 +3,557 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ICAO Aviation English Trainer</title>
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@300;400;600;700&display=swap" rel="stylesheet">
+<title>ICAO Aviation English Trainer v2</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --green: #00ff88;
-    --green-dim: #00aa55;
-    --green-dark: #004422;
-    --bg: #060e08;
-    --bg2: #0a1a0c;
-    --bg3: #0d2010;
-    --border: #1a4a20;
-    --text: #c0e8c8;
-    --text-dim: #4a8a5a;
-    --red: #ff4444;
-    --orange: #ffaa44;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Share Tech Mono', monospace;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-  body::before {
-    content: '';
-    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-    background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,255,136,0.012) 3px, rgba(0,255,136,0.012) 4px);
-    pointer-events: none; z-index: 100;
-  }
-
-  /* HEADER */
-  header {
-    background: linear-gradient(135deg, var(--bg2), var(--bg3));
-    border-bottom: 2px solid var(--border);
-    padding: 14px 20px;
-    display: flex; align-items: center; justify-content: space-between;
-    box-shadow: 0 4px 30px rgba(0,200,80,0.1);
-    position: sticky; top: 0; z-index: 50;
-  }
-  .logo { display: flex; align-items: center; gap: 12px; }
-  .logo-icon {
-    width: 42px; height: 42px; border-radius: 50%;
-    background: radial-gradient(circle, rgba(0,255,136,0.15), rgba(0,40,20,0.8));
-    border: 2px solid var(--green-dim);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 20px;
-    box-shadow: 0 0 15px rgba(0,200,80,0.4);
-    animation: pulse 2s infinite;
-  }
-  .logo-text { font-size: 17px; color: var(--green); letter-spacing: 3px; font-weight: bold; }
-  .logo-sub { font-size: 9px; color: var(--text-dim); letter-spacing: 2px; margin-top: 2px; }
-  .status {
-    background: var(--bg); border: 1px solid var(--border);
-    padding: 5px 12px; border-radius: 4px;
-    font-size: 10px; color: var(--green-dim); letter-spacing: 2px;
-  }
-
-  /* NAV */
-  nav {
-    display: flex; gap: 2px; padding: 10px 16px;
-    background: #050c07; border-bottom: 1px solid #0f2a12;
-    overflow-x: auto;
-  }
-  nav button {
-    padding: 9px 16px; border: none; border-radius: 4px;
-    cursor: pointer; font-family: 'Share Tech Mono', monospace;
-    font-size: 11px; letter-spacing: 1px; white-space: nowrap;
-    transition: all 0.2s; border-top: 2px solid transparent;
-    background: var(--bg2); color: var(--text-dim);
-  }
-  nav button.active {
-    background: var(--green-dim); color: #000; font-weight: bold;
-    border-top-color: var(--green);
-    box-shadow: 0 0 15px rgba(0,180,80,0.3);
-  }
-  nav button:hover:not(.active) { color: var(--green); border-top-color: var(--border); }
-
-  /* MAIN */
-  main { max-width: 900px; margin: 0 auto; padding: 20px 16px; }
-
-  /* API KEY BANNER */
-  .api-banner {
-    background: linear-gradient(135deg, #1a0a00, #2a1000);
-    border: 1px solid #aa4400; border-radius: 8px;
-    padding: 14px 16px; margin-bottom: 20px;
-    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
-  }
-  .api-banner span { font-size: 12px; color: var(--orange); flex: 1; min-width: 200px; }
-  .api-banner input {
-    flex: 2; min-width: 200px; padding: 8px 12px;
-    background: #0a0500; border: 1px solid #aa4400; border-radius: 4px;
-    color: var(--orange); font-family: 'Share Tech Mono', monospace; font-size: 11px; outline: none;
-  }
-  .api-banner button {
-    padding: 8px 16px; background: #aa4400; border: none; border-radius: 4px;
-    color: #fff; font-family: 'Share Tech Mono', monospace; font-size: 11px;
-    cursor: pointer; letter-spacing: 1px;
-  }
-
-  /* RADIO MODULE */
-  .module-header { font-size: 12px; color: var(--text-dim); letter-spacing: 2px; margin-bottom: 14px; }
-  .radio-info {
-    background: var(--bg2); border: 1px solid var(--border); border-radius: 6px;
-    padding: 10px 14px; font-size: 11px; color: var(--text-dim); margin-bottom: 16px;
-    letter-spacing: 1px; display: flex; flex-wrap: wrap; gap: 12px;
-  }
-  .radio-info span { color: var(--green); }
-  .chat-window {
-    height: 360px; overflow-y: auto; padding: 14px;
-    background: #040c06; border: 1px solid var(--border); border-radius: 8px;
-    margin-bottom: 12px; display: flex; flex-direction: column; gap: 10px;
-    scrollbar-width: thin; scrollbar-color: var(--border) #040c06;
-  }
-  .msg { display: flex; flex-direction: column; }
-  .msg.user { align-items: flex-end; }
-  .msg.atc { align-items: flex-start; }
-  .bubble {
-    max-width: 82%; padding: 10px 14px; border-radius: 6px;
-    font-size: 12px; line-height: 1.7;
-  }
-  .msg.user .bubble {
-    background: linear-gradient(135deg, #0a3020, #0d4428);
-    border: 1px solid var(--green-dim); color: #88ffaa;
-    box-shadow: 0 0 10px rgba(0,170,68,0.15);
-  }
-  .msg.atc .bubble {
-    background: linear-gradient(135deg, var(--bg2), var(--bg3));
-    border: 1px solid var(--border); color: var(--text);
-  }
-  .msg-label { font-size: 9px; color: var(--green-dim); letter-spacing: 2px; margin-bottom: 4px; }
-  .typing { color: var(--text-dim); font-size: 11px; }
-  @keyframes blink { 0%,100%{opacity:1}50%{opacity:0} }
-  .blink { animation: blink 1s infinite; }
-
-  .radio-input-row { display: flex; gap: 8px; }
-  .radio-input {
-    flex: 1; padding: 11px 14px;
-    background: var(--bg2); border: 1px solid var(--green-dark); border-radius: 6px;
-    color: var(--green); font-family: 'Share Tech Mono', monospace; font-size: 12px;
-    outline: none; letter-spacing: 1px;
-    transition: border-color 0.2s;
-  }
-  .radio-input:focus { border-color: var(--green-dim); }
-  .radio-input::placeholder { color: var(--text-dim); }
-  .transmit-btn {
-    padding: 11px 18px; border: none; border-radius: 6px;
-    font-family: 'Share Tech Mono', monospace; font-size: 12px;
-    font-weight: bold; cursor: pointer; letter-spacing: 1px; transition: all 0.2s;
-    background: var(--green-dim); color: #000;
-  }
-  .transmit-btn:disabled { background: #0a2010; color: #2a5a3a; cursor: not-allowed; }
-  .hint { margin-top: 8px; font-size: 10px; color: #2a5a3a; letter-spacing: 1px; }
-
-  /* VOCAB */
-  .cat-tabs { display: flex; gap: 6px; margin-bottom: 18px; flex-wrap: wrap; }
-  .cat-tab {
-    padding: 7px 14px; border: none; border-radius: 4px; cursor: pointer;
-    font-family: 'Share Tech Mono', monospace; font-size: 10px; letter-spacing: 1px;
-    transition: all 0.2s;
-    background: var(--bg2); color: var(--text-dim); border: 1px solid var(--border);
-  }
-  .cat-tab.active { background: var(--green-dim); color: #000; border-color: var(--green); }
-  .vocab-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
-  .vocab-card {
-    padding: 18px; border-radius: 8px; cursor: pointer; min-height: 110px;
-    display: flex; flex-direction: column; justify-content: center;
-    transition: all 0.3s; border: 1px solid var(--border);
-    background: linear-gradient(135deg, var(--bg2), var(--bg3));
-  }
-  .vocab-card:hover { border-color: var(--green-dim); }
-  .vocab-card.flipped {
-    background: linear-gradient(135deg, #0a3020, #0d4428);
-    border-color: var(--green-dim);
-    box-shadow: 0 0 20px rgba(0,170,68,0.2);
-  }
-  .card-label { font-size: 9px; color: var(--text-dim); letter-spacing: 2px; margin-bottom: 8px; }
-  .card-main { font-size: 15px; color: #88ffaa; font-weight: bold; }
-  .card-sub { font-size: 13px; color: var(--text); margin: 8px 0 4px; }
-  .card-phonetic { font-size: 12px; color: var(--green); font-style: italic; }
-  .card-hint { margin-top: 10px; font-size: 9px; color: var(--text-dim); }
-
-  .phonetic-box {
-    margin-top: 22px; padding: 16px;
-    background: #040c06; border: 1px solid var(--border); border-radius: 8px;
-  }
-  .phonetic-box .box-title { font-size: 10px; color: var(--text-dim); letter-spacing: 2px; margin-bottom: 12px; }
-  .phonetic-list { display: flex; flex-wrap: wrap; gap: 6px; }
-  .phonetic-item {
-    background: var(--bg2); border: 1px solid var(--border);
-    border-radius: 3px; padding: 4px 8px; font-size: 10px; color: var(--text-dim);
-  }
-  .phonetic-item .letter { color: var(--green); }
-
-  /* EMERGENCY */
-  .emg-alert {
-    padding: 12px 16px; background: #1a0800; border: 1px solid #aa3300;
-    border-radius: 6px; margin-bottom: 18px; font-size: 11px; color: #ff8866; letter-spacing: 1px;
-  }
-  .emg-tabs { display: flex; gap: 6px; margin-bottom: 18px; flex-wrap: wrap; }
-  .emg-tab {
-    padding: 7px 12px; border: none; border-radius: 4px; cursor: pointer;
-    font-family: 'Share Tech Mono', monospace; font-size: 10px; letter-spacing: 1px;
-    background: #1a0800; color: #884422; border: 1px solid #4a1a00; transition: all 0.2s;
-  }
-  .emg-tab.active { background: #aa3300; color: #fff; border-color: #ff6644; }
-  .emg-scenario {
-    padding: 16px; background: #0d0400; border: 1px solid #aa3300;
-    border-radius: 8px; margin-bottom: 14px;
-  }
-  .emg-label { font-size: 9px; color: #884422; letter-spacing: 2px; margin-bottom: 8px; }
-  .emg-title { font-size: 15px; color: #ff8866; font-weight: bold; }
-  .emg-transmission {
-    padding: 16px; background: #0d0400; border: 2px solid #cc4400;
-    border-radius: 8px; margin-bottom: 14px;
-    box-shadow: 0 0 20px rgba(200,80,0,0.12);
-  }
-  .emg-text { font-size: 13px; color: #ffcc88; line-height: 1.8; letter-spacing: 1px; }
-  .tips-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
-  .tip {
-    padding: 12px; background: #0a0a00; border: 1px solid #4a3a00;
-    border-radius: 6px; font-size: 11px; color: #ccaa44;
-    border-left: 3px solid #aa8800; line-height: 1.5;
-  }
-
-  /* EXAM */
-  .progress-bar {
-    height: 4px; background: var(--bg2); border-radius: 2px; margin-bottom: 20px; overflow: hidden;
-  }
-  .progress-fill {
-    height: 100%; background: var(--green-dim); border-radius: 2px;
-    transition: width 0.3s; box-shadow: 0 0 8px rgba(0,200,80,0.4);
-  }
-  .exam-meta { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-dim); margin-bottom: 18px; }
-  .exam-q {
-    padding: 20px; background: #040c06; border: 1px solid var(--border);
-    border-radius: 8px; margin-bottom: 16px; font-size: 14px;
-    color: #88ffaa; line-height: 1.7;
-  }
-  .options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
-  .option {
-    padding: 13px 16px; border-radius: 6px; cursor: pointer; text-align: left;
-    font-family: 'Share Tech Mono', monospace; font-size: 12px; transition: all 0.3s;
-    background: var(--bg2); border: 1px solid var(--border); color: var(--text);
-    letter-spacing: 0.5px;
-  }
-  .option:hover:not(:disabled) { border-color: var(--green-dim); color: var(--green); }
-  .option.correct { background: #0a3020; border-color: var(--green); color: var(--green); }
-  .option.wrong { background: #1a0808; border-color: var(--red); color: #ff8888; }
-  .option:disabled { cursor: default; }
-  .opt-letter { opacity: 0.4; margin-right: 10px; }
-  .explanation {
-    padding: 14px; background: var(--bg2); border: 1px solid #1a6a2a;
-    border-radius: 6px; font-size: 11px; color: #88cc88; line-height: 1.7;
-    margin-bottom: 16px; border-left: 3px solid var(--green-dim);
-  }
-  .next-btn {
-    width: 100%; padding: 14px; background: var(--green-dim); border: none;
-    border-radius: 6px; color: #000; font-family: 'Share Tech Mono', monospace;
-    font-size: 13px; font-weight: bold; cursor: pointer; letter-spacing: 2px;
-    transition: all 0.2s;
-  }
-  .next-btn:hover { background: var(--green); }
-  .result-box {
-    padding: 40px; text-align: center; background: #040c06;
-    border: 2px solid var(--green-dim); border-radius: 12px;
-  }
-  .result-emoji { font-size: 56px; margin-bottom: 16px; }
-  .result-score { font-size: 36px; color: var(--green); margin-bottom: 8px; }
-  .result-msg { font-size: 13px; color: var(--text-dim); margin-bottom: 28px; }
-  .restart-btn {
-    padding: 12px 28px; background: var(--green-dim); border: none;
-    border-radius: 6px; color: #000; font-family: 'Share Tech Mono', monospace;
-    font-size: 13px; font-weight: bold; cursor: pointer; letter-spacing: 2px;
-  }
-
-  @keyframes pulse { 0%,100%{box-shadow:0 0 12px rgba(0,200,80,0.3)} 50%{box-shadow:0 0 24px rgba(0,200,80,0.6)} }
-  @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
-  .fade-in { animation: fadeIn 0.3s ease; }
-
-  ::-webkit-scrollbar { width: 5px; }
-  ::-webkit-scrollbar-track { background: #040c06; }
-  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+:root{--green:#00ff88;--gdim:#00aa55;--gdk:#004422;--bg:#060e08;--bg2:#0a1a0c;--bg3:#0d2010;--bdr:#1a4a20;--txt:#c0e8c8;--dim:#4a8a5a;--red:#ff4444;--ora:#ffaa44;--blu:#44aaff;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--txt);font-family:'Share Tech Mono',monospace;min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,255,136,0.01) 3px,rgba(0,255,136,0.01) 4px);pointer-events:none;z-index:100;}
+header{background:linear-gradient(135deg,var(--bg2),var(--bg3));border-bottom:2px solid var(--bdr);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;box-shadow:0 4px 30px rgba(0,200,80,0.1);}
+.logo{display:flex;align-items:center;gap:12px;}
+.logo-icon{width:40px;height:40px;border-radius:50%;background:radial-gradient(circle,rgba(0,255,136,0.15),rgba(0,40,20,0.8));border:2px solid var(--gdim);display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 0 15px rgba(0,200,80,0.4);animation:pulse 2s infinite;}
+.logo-title{font-family:'Orbitron',monospace;font-size:13px;color:var(--green);letter-spacing:2px;}
+.logo-sub{font-size:8px;color:var(--dim);letter-spacing:2px;margin-top:2px;}
+.status{background:var(--bg);border:1px solid var(--bdr);padding:4px 10px;border-radius:4px;font-size:9px;color:var(--gdim);letter-spacing:2px;}
+nav{display:flex;gap:2px;padding:8px 14px;background:#050c07;border-bottom:1px solid #0f2a12;overflow-x:auto;}
+nav button{padding:8px 14px;border:none;border-radius:4px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:1px;white-space:nowrap;transition:all 0.2s;border-top:2px solid transparent;background:var(--bg2);color:var(--dim);}
+nav button.active{background:var(--gdim);color:#000;font-weight:bold;border-top-color:var(--green);}
+nav button:hover:not(.active){color:var(--green);}
+main{max-width:960px;margin:0 auto;padding:16px 14px;}
+.mod-hdr{font-size:10px;color:var(--dim);letter-spacing:2px;margin-bottom:12px;}
+/* BANNER */
+.api-banner{background:linear-gradient(135deg,#1a0a00,#2a1000);border:1px solid #aa4400;border-radius:8px;padding:12px 16px;margin-bottom:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.api-banner span{font-size:10px;color:var(--ora);flex:1;min-width:180px;}
+.api-banner input{flex:2;min-width:160px;padding:7px 10px;background:#0a0500;border:1px solid #aa4400;border-radius:4px;color:var(--ora);font-family:'Share Tech Mono',monospace;font-size:10px;outline:none;}
+.btn{padding:7px 12px;border:none;border-radius:4px;font-family:'Share Tech Mono',monospace;font-size:10px;cursor:pointer;letter-spacing:1px;transition:all 0.2s;}
+.btn-o{background:#aa4400;color:#fff;} .btn-g{background:var(--gdim);color:#000;font-weight:bold;} .btn-r{background:#880000;color:#fff;} .btn-b{background:#004488;color:var(--blu);}
+.btn-g:hover{background:var(--green);}
+/* RADIO INFO */
+.radio-info{background:var(--bg2);border:1px solid var(--bdr);border-radius:6px;padding:8px 12px;font-size:10px;color:var(--dim);margin-bottom:12px;display:flex;flex-wrap:wrap;gap:10px;letter-spacing:1px;}
+.radio-info span{color:var(--green);}
+/* SESSIONS */
+.sess-bar{display:flex;gap:5px;margin-bottom:12px;flex-wrap:wrap;align-items:center;}
+.sess-chip{padding:4px 10px;border-radius:20px;font-size:9px;cursor:pointer;border:1px solid var(--bdr);background:var(--bg2);color:var(--dim);transition:all 0.2s;}
+.sess-chip.active{background:var(--gdk);border-color:var(--gdim);color:var(--green);}
+.sess-del{margin-left:5px;color:var(--red);font-size:9px;cursor:pointer;}
+.new-sess{padding:4px 10px;border-radius:20px;font-size:9px;border:1px dashed var(--bdr);background:transparent;color:var(--dim);cursor:pointer;font-family:'Share Tech Mono',monospace;}
+.new-sess:hover{border-color:var(--gdim);color:var(--green);}
+/* CHAT */
+.chat-win{height:320px;overflow-y:auto;padding:12px;background:#040c06;border:1px solid var(--bdr);border-radius:8px;margin-bottom:10px;display:flex;flex-direction:column;gap:8px;scrollbar-width:thin;scrollbar-color:var(--bdr) #040c06;}
+.msg{display:flex;flex-direction:column;}
+.msg.user{align-items:flex-end;} .msg.atc{align-items:flex-start;}
+.bubble{max-width:85%;padding:9px 12px;border-radius:6px;font-size:11px;line-height:1.7;}
+.msg.user .bubble{background:linear-gradient(135deg,#0a3020,#0d4428);border:1px solid var(--gdim);color:#88ffaa;}
+.msg.atc .bubble{background:linear-gradient(135deg,var(--bg2),var(--bg3));border:1px solid var(--bdr);color:var(--txt);}
+.msg-lbl{font-size:8px;color:var(--gdim);letter-spacing:2px;margin-bottom:3px;}
+.typing{color:var(--dim);font-size:10px;animation:blink 1s infinite;}
+/* INPUT */
+.inp-row{display:flex;gap:6px;align-items:center;}
+.radio-inp{flex:1;padding:10px 12px;background:var(--bg2);border:1px solid var(--gdk);border-radius:6px;color:var(--green);font-family:'Share Tech Mono',monospace;font-size:11px;outline:none;transition:border-color 0.2s;}
+.radio-inp:focus{border-color:var(--gdim);}
+.radio-inp::placeholder{color:var(--dim);}
+.mic-btn{width:42px;height:42px;border-radius:50%;border:2px solid var(--gdim);background:var(--bg2);color:var(--green);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;flex-shrink:0;}
+.mic-btn.rec{background:#880000;border-color:var(--red);animation:pulse-r 0.8s infinite;}
+.tx-btn{padding:10px 14px;border:none;border-radius:6px;font-family:'Share Tech Mono',monospace;font-size:11px;font-weight:bold;cursor:pointer;letter-spacing:1px;background:var(--gdim);color:#000;transition:all 0.2s;white-space:nowrap;}
+.tx-btn:disabled{background:#0a2010;color:#2a5a3a;cursor:not-allowed;}
+/* VOICE CTL */
+.voice-ctl{display:flex;gap:8px;margin-top:8px;align-items:center;flex-wrap:wrap;}
+.v-toggle{display:flex;align-items:center;gap:5px;font-size:9px;color:var(--dim);cursor:pointer;}
+.toggle{width:30px;height:15px;background:#1a3a1a;border-radius:8px;position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;}
+.toggle.on{background:var(--gdim);}
+.toggle::after{content:'';position:absolute;top:2px;left:2px;width:11px;height:11px;background:#fff;border-radius:50%;transition:left 0.2s;}
+.toggle.on::after{left:17px;}
+.hint{font-size:9px;color:#2a5a3a;margin-top:6px;letter-spacing:1px;}
+/* VOCAB */
+.cat-tabs{display:flex;gap:4px;margin-bottom:12px;flex-wrap:wrap;}
+.cat-tab{padding:5px 10px;border:none;border-radius:4px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:1px;transition:all 0.2s;background:var(--bg2);color:var(--dim);border:1px solid var(--bdr);}
+.cat-tab.active{background:var(--gdim);color:#000;border-color:var(--green);}
+.v-search{width:100%;padding:8px 12px;background:var(--bg2);border:1px solid var(--bdr);border-radius:6px;color:var(--green);font-family:'Share Tech Mono',monospace;font-size:11px;outline:none;margin-bottom:12px;}
+.v-search::placeholder{color:var(--dim);}
+.v-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px;}
+.v-card{padding:14px;border-radius:8px;cursor:pointer;min-height:95px;display:flex;flex-direction:column;justify-content:center;transition:all 0.3s;border:1px solid var(--bdr);background:linear-gradient(135deg,var(--bg2),var(--bg3));}
+.v-card:hover{border-color:var(--gdim);}
+.v-card.flipped{background:linear-gradient(135deg,#0a3020,#0d4428);border-color:var(--gdim);}
+.c-lbl{font-size:8px;color:var(--dim);letter-spacing:2px;margin-bottom:5px;}
+.c-en{font-size:13px;color:#88ffaa;font-weight:bold;line-height:1.4;}
+.c-fr{font-size:11px;color:var(--txt);margin:5px 0 3px;}
+.c-ph{font-size:10px;color:var(--green);font-style:italic;}
+.c-hint{margin-top:6px;font-size:8px;color:var(--dim);}
+.v-count{font-size:9px;color:var(--dim);margin-bottom:8px;}
+/* EMERGENCY */
+.emg-alert{padding:10px 14px;background:#1a0800;border:1px solid #aa3300;border-radius:6px;margin-bottom:12px;font-size:10px;color:#ff8866;letter-spacing:1px;}
+.emg-tabs{display:flex;gap:4px;margin-bottom:12px;flex-wrap:wrap;}
+.emg-tab{padding:5px 9px;border:none;border-radius:4px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:9px;background:#1a0800;color:#884422;border:1px solid #4a1a00;transition:all 0.2s;}
+.emg-tab.active{background:#aa3300;color:#fff;border-color:#ff6644;}
+.emg-box{padding:12px;background:#0d0400;border-radius:8px;margin-bottom:10px;}
+.emg-box.main{border:2px solid #cc4400;}
+.emg-box.scen{border:1px solid #aa3300;}
+.e-lbl{font-size:8px;color:#884422;letter-spacing:2px;margin-bottom:5px;}
+.e-title{font-size:13px;color:#ff8866;font-weight:bold;}
+.e-text{font-size:11px;color:#ffcc88;line-height:1.8;letter-spacing:0.5px;}
+.tips-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:7px;}
+.tip{padding:9px;background:#0a0a00;border:1px solid #4a3a00;border-radius:6px;font-size:10px;color:#ccaa44;border-left:3px solid #aa8800;line-height:1.5;}
+/* EXAM */
+.exam-cats{display:flex;gap:4px;margin-bottom:12px;flex-wrap:wrap;}
+.exam-cat{padding:5px 10px;border:none;border-radius:4px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:1px;background:var(--bg2);color:var(--dim);border:1px solid var(--bdr);transition:all 0.2s;}
+.exam-cat.active{background:#004488;color:var(--blu);border-color:var(--blu);}
+.prog-bar{height:4px;background:var(--bg2);border-radius:2px;margin-bottom:14px;overflow:hidden;}
+.prog-fill{height:100%;background:var(--gdim);border-radius:2px;transition:width 0.3s;}
+.exam-meta{display:flex;justify-content:space-between;font-size:10px;color:var(--dim);margin-bottom:12px;}
+.exam-q{padding:16px;background:#040c06;border:1px solid var(--bdr);border-radius:8px;margin-bottom:12px;font-size:12px;color:#88ffaa;line-height:1.7;}
+.options{display:flex;flex-direction:column;gap:7px;margin-bottom:12px;}
+.option{padding:11px 12px;border-radius:6px;cursor:pointer;text-align:left;font-family:'Share Tech Mono',monospace;font-size:11px;transition:all 0.3s;background:var(--bg2);border:1px solid var(--bdr);color:var(--txt);}
+.option:hover:not(:disabled){border-color:var(--gdim);color:var(--green);}
+.option.correct{background:#0a3020;border-color:var(--green);color:var(--green);}
+.option.wrong{background:#1a0808;border-color:var(--red);color:#ff8888;}
+.option:disabled{cursor:default;}
+.opt-l{opacity:0.4;margin-right:7px;}
+.expl{padding:12px;background:var(--bg2);border-radius:6px;font-size:10px;line-height:1.7;margin-bottom:12px;border-left:3px solid var(--gdim);}
+.exp-en{color:#88cc88;margin-bottom:7px;}
+.exp-fr{color:#88aaff;border-top:1px solid var(--bdr);padding-top:7px;}
+.exp-lbl{font-size:7px;letter-spacing:2px;opacity:0.6;margin-bottom:3px;}
+.next-btn{width:100%;padding:11px;background:var(--gdim);border:none;border-radius:6px;color:#000;font-family:'Share Tech Mono',monospace;font-size:11px;font-weight:bold;cursor:pointer;letter-spacing:2px;transition:all 0.2s;}
+.next-btn:hover{background:var(--green);}
+.result-box{padding:32px;text-align:center;background:#040c06;border:2px solid var(--gdim);border-radius:12px;}
+.r-emoji{font-size:50px;margin-bottom:12px;}
+.r-score{font-size:32px;color:var(--green);margin-bottom:6px;font-family:'Orbitron',monospace;}
+.r-msg{font-size:11px;color:var(--dim);margin-bottom:20px;}
+/* SCORES */
+.score-item{padding:6px 10px;background:var(--bg2);border:1px solid var(--bdr);border-radius:4px;font-size:10px;color:var(--dim);margin-bottom:4px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;}
+/* PHONETIC */
+.ph-box{margin-top:18px;padding:12px;background:#040c06;border:1px solid var(--bdr);border-radius:8px;}
+.ph-list{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;}
+.ph-item{background:var(--bg2);border:1px solid var(--bdr);border-radius:3px;padding:3px 6px;font-size:9px;color:var(--dim);}
+.ph-item .l{color:var(--green);}
+/* MODAL */
+.modal-ov{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;}
+.modal{background:var(--bg2);border:1px solid var(--bdr);border-radius:10px;padding:22px;width:100%;max-width:380px;}
+.modal h3{font-family:'Orbitron',monospace;color:var(--green);font-size:13px;margin-bottom:14px;letter-spacing:2px;}
+.modal input{width:100%;padding:9px;background:var(--bg);border:1px solid var(--bdr);border-radius:6px;color:var(--green);font-family:'Share Tech Mono',monospace;font-size:11px;outline:none;margin-bottom:12px;}
+.modal-btns{display:flex;gap:7px;justify-content:flex-end;}
+@keyframes pulse{0%,100%{box-shadow:0 0 12px rgba(0,200,80,0.3)}50%{box-shadow:0 0 24px rgba(0,200,80,0.6)}}
+@keyframes pulse-r{0%,100%{box-shadow:0 0 8px rgba(255,0,0,0.4)}50%{box-shadow:0 0 20px rgba(255,0,0,0.8)}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.fi{animation:fadeIn 0.3s ease;}
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:#040c06;}
+::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:3px;}
 </style>
 </head>
 <body>
-
 <header>
   <div class="logo">
     <div class="logo-icon">✈️</div>
     <div>
-      <div class="logo-text">ICAO ENGLISH TRAINER</div>
+      <div class="logo-title">ICAO ENGLISH TRAINER v2</div>
       <div class="logo-sub">AVIATION ENGLISH • LEVEL 4 PREPARATION</div>
     </div>
   </div>
   <div class="status">● SYSTEM ACTIVE</div>
 </header>
-
 <nav>
-  <button class="active" onclick="showModule('radio', this)">📡 Radio Simulation</button>
-  <button onclick="showModule('vocab', this)">📖 Vocabulary</button>
-  <button onclick="showModule('emergency', this)">🚨 Emergency</button>
-  <button onclick="showModule('exam', this)">🎓 Exam Practice</button>
+  <button class="active" onclick="showMod('radio',this)">📡 Radio Sim</button>
+  <button onclick="showMod('vocab',this)">📖 Vocabulary</button>
+  <button onclick="showMod('emergency',this)">🚨 Emergency</button>
+  <button onclick="showMod('exam',this)">🎓 Exam</button>
+  <button onclick="showMod('scores',this)">📊 Scores</button>
+  <button onclick="showMod('settings',this)">⚙️ Settings</button>
 </nav>
-
 <main>
 
-  <!-- API KEY BANNER -->
-  <div class="api-banner" id="apiBanner">
-    <span>🔑 Entrez votre clé API Anthropic pour activer le simulateur radio IA :</span>
-    <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-..." />
-    <button onclick="saveKey()">ENREGISTRER</button>
-  </div>
+<!-- API BANNER -->
+<div class="api-banner" id="apiBanner">
+  <span>🔑 Clé API Anthropic requise :</span>
+  <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-..."/>
+  <button class="btn btn-o" onclick="saveKey()">ENREGISTRER</button>
+</div>
 
-  <!-- RADIO MODULE -->
-  <div id="module-radio" class="fade-in">
-    <div class="module-header">▸ RADIO PHRASEOLOGY SIMULATOR • Powered by AI ATC</div>
-    <div class="radio-info">
-      <span>🛩️ Callsign: <span>GOLF-ALPHA-BRAVO-CHARLIE-DELTA</span></span>
-      <span>🏙️ Airport: <span>DIAP (Abidjan)</span></span>
-      <span>📻 Freq: <span>118.300 MHz</span></span>
-    </div>
-    <div class="chat-window" id="chatWindow">
-      <div class="msg atc fade-in">
-        <div class="msg-label">🎙️ ATC TOWER:</div>
-        <div class="bubble">Good evening. Welcome to Aviation English Training Center. I am your ATC controller. When ready, state your callsign and request to taxi.</div>
+<!-- RADIO -->
+<div id="mod-radio" class="fi">
+  <div class="mod-hdr">▸ RADIO PHRASEOLOGY SIMULATOR • AI ATC + Voice</div>
+  <div class="radio-info">
+    <span>🛩️ Callsign: <span id="csLabel">GOLF-ALPHA-BRAVO-CHARLIE-DELTA</span></span>
+    <span>🏙️ Airport: <span>DIAP Abidjan</span></span>
+    <span>📻 Freq: <span>118.300 MHz</span></span>
+  </div>
+  <div class="sess-bar" id="sessBar"></div>
+  <div class="chat-win" id="chatWin"></div>
+  <div class="inp-row">
+    <button class="mic-btn" id="micBtn" onclick="toggleMic()" title="Parler en anglais">🎤</button>
+    <input class="radio-inp" id="radioInp" placeholder="Transmission en anglais... (ou micro 🎤)" onkeydown="if(event.key==='Enter')send()"/>
+    <button class="tx-btn" id="txBtn" onclick="send()">TX →</button>
+  </div>
+  <div class="voice-ctl">
+    <div class="v-toggle" onclick="toggleAV()"><div class="toggle" id="avTog"></div><span>🔊 Voix ATC</span></div>
+    <div class="v-toggle" onclick="toggleRE()"><div class="toggle" id="reTog"></div><span>📻 Effet radio</span></div>
+    <button class="btn btn-r" style="font-size:9px;padding:3px 8px;" onclick="clearSess()">🗑 Effacer</button>
+    <button class="btn btn-b" style="font-size:9px;padding:3px 8px;" onclick="openModal()">＋ Session</button>
+  </div>
+  <div class="hint">💡 Micro = Chrome requis | Voix ATC activable | Sessions sauvegardées automatiquement</div>
+</div>
+
+<!-- VOCAB -->
+<div id="mod-vocab" style="display:none" class="fi">
+  <div class="mod-hdr">▸ VOCABULARY BANK • 200+ termes ICAO</div>
+  <input class="v-search" id="vSearch" placeholder="🔍 Rechercher..." oninput="renderVocab()"/>
+  <div class="cat-tabs" id="catTabs"></div>
+  <div class="v-count" id="vCount"></div>
+  <div class="v-grid" id="vGrid"></div>
+  <div class="ph-box">
+    <div style="font-size:9px;color:var(--dim);letter-spacing:2px;">📻 ICAO PHONETIC ALPHABET</div>
+    <div class="ph-list" id="phList"></div>
+  </div>
+</div>
+
+<!-- EMERGENCY -->
+<div id="mod-emergency" style="display:none" class="fi">
+  <div class="mod-hdr" style="color:#ff6644;">▸ EMERGENCY PHRASEOLOGY</div>
+  <div class="emg-alert">⚠️ MAYDAY = danger immédiat | PAN-PAN = urgence sans danger immédiat | 121.500 MHz</div>
+  <div class="emg-tabs" id="emgTabs"></div>
+  <div id="emgContent"></div>
+</div>
+
+<!-- EXAM -->
+<div id="mod-exam" style="display:none" class="fi">
+  <div class="mod-hdr">▸ EXAM PRACTICE • Style OACI Niveau 4 — Explications FR + EN</div>
+  <div class="exam-cats" id="examCats"></div>
+  <div id="examBox"></div>
+</div>
+
+<!-- SCORES -->
+<div id="mod-scores" style="display:none" class="fi">
+  <div class="mod-hdr">▸ HISTORIQUE DES SCORES</div>
+  <div id="scoresBox"></div>
+</div>
+
+<!-- SETTINGS -->
+<div id="mod-settings" style="display:none" class="fi">
+  <div class="mod-hdr">▸ PARAMÈTRES</div>
+  <div style="display:flex;flex-direction:column;gap:12px;">
+    <div style="padding:14px;background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;">
+      <div style="font-size:10px;color:var(--green);margin-bottom:9px;letter-spacing:1px;">🔑 CLÉ API ANTHROPIC</div>
+      <div style="display:flex;gap:7px;">
+        <input type="password" id="sKeyInp" placeholder="sk-ant-..." style="flex:1;padding:7px;background:var(--bg);border:1px solid var(--bdr);border-radius:4px;color:var(--green);font-family:'Share Tech Mono',monospace;font-size:10px;outline:none;"/>
+        <button class="btn btn-o" onclick="sKeySet()">SAUVER</button>
+        <button class="btn btn-r" onclick="sKeyDel()">SUPPR.</button>
       </div>
     </div>
-    <div class="radio-input-row">
-      <input class="radio-input" id="radioInput" placeholder="State your radio transmission in English..." onkeydown="if(event.key==='Enter') sendMessage()" />
-      <button class="transmit-btn" id="txBtn" onclick="sendMessage()">TRANSMIT →</button>
+    <div style="padding:14px;background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;">
+      <div style="font-size:10px;color:var(--green);margin-bottom:9px;letter-spacing:1px;">🎙️ CALLSIGN</div>
+      <div style="display:flex;gap:7px;">
+        <input id="csInp" placeholder="Ex: FOXTROT-HOTEL-LIMA" style="flex:1;padding:7px;background:var(--bg);border:1px solid var(--bdr);border-radius:4px;color:var(--green);font-family:'Share Tech Mono',monospace;font-size:10px;outline:none;"/>
+        <button class="btn btn-g" onclick="saveCS()">SAUVER</button>
+      </div>
     </div>
-    <div class="hint">💡 Essaie: "Abidjan Ground, Golf Alpha Bravo Charlie Delta, request taxi to runway..."</div>
-  </div>
-
-  <!-- VOCAB MODULE -->
-  <div id="module-vocab" style="display:none" class="fade-in">
-    <div class="module-header">▸ VOCABULARY BANK • Click cards to reveal translation</div>
-    <div class="cat-tabs" id="catTabs"></div>
-    <div class="vocab-grid" id="vocabGrid"></div>
-    <div class="phonetic-box">
-      <div class="box-title">📻 ICAO PHONETIC ALPHABET</div>
-      <div class="phonetic-list" id="phoneticList"></div>
+    <div style="padding:14px;background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;">
+      <div style="font-size:10px;color:var(--green);margin-bottom:9px;letter-spacing:1px;">🗑 DONNÉES</div>
+      <button class="btn btn-r" onclick="if(confirm('Effacer toutes les données ?'))clearAll()">TOUT EFFACER</button>
     </div>
   </div>
-
-  <!-- EMERGENCY MODULE -->
-  <div id="module-emergency" style="display:none" class="fade-in">
-    <div class="module-header" style="color:#ff6644">▸ EMERGENCY PHRASEOLOGY • MAYDAY & PAN-PAN PROCEDURES</div>
-    <div class="emg-alert">⚠️ MAYDAY = Immediate danger to life &nbsp;|&nbsp; PAN-PAN = Urgency, no immediate danger &nbsp;|&nbsp; Both on 121.500 MHz</div>
-    <div class="emg-tabs" id="emgTabs"></div>
-    <div id="emgContent"></div>
-  </div>
-
-  <!-- EXAM MODULE -->
-  <div id="module-exam" style="display:none" class="fade-in">
-    <div class="module-header">▸ EXAM PRACTICE • ICAO LEVEL 4 STYLE QUESTIONS</div>
-    <div id="examContainer"></div>
-  </div>
+</div>
 
 </main>
 
+<!-- MODAL -->
+<div class="modal-ov" id="modal" style="display:none">
+  <div class="modal">
+    <h3>NOUVELLE SESSION</h3>
+    <input id="sNameInp" placeholder="Ex: Session Taxi 17 avril"/>
+    <div class="modal-btns">
+      <button class="btn" style="background:var(--bg);color:var(--dim);border:1px solid var(--bdr);" onclick="closeModal()">ANNULER</button>
+      <button class="btn btn-g" onclick="createSess()">CRÉER</button>
+    </div>
+  </div>
+</div>
+
 <script>
-// =================== DATA ===================
-const VOCAB = {
-  "ATC Clearances": [
-    { en: "Cleared for takeoff", fr: "Autorisé au décollage", ph: "KLEERD for TAYK-awf" },
-    { en: "Runway in use", fr: "Piste en service", ph: "RUN-way in YOOZ" },
-    { en: "Hold short", fr: "Arrêtez avant la piste", ph: "HOHLD SHORT" },
-    { en: "Line up and wait", fr: "Alignez-vous et attendez", ph: "LYN up and WAYT" },
-    { en: "Wind shear alert", fr: "Alerte cisaillement de vent", ph: "WIND SHEER uh-LERT" },
-    { en: "Go around", fr: "Remise des gaz", ph: "GOH uh-ROWND" },
+// ===== DATA =====
+const VOCAB={
+  "ATC Clearances":[
+    {en:"Cleared for takeoff",fr:"Autorisé au décollage",ph:"KLEERD for TAYK-awf"},
+    {en:"Cleared to land",fr:"Autorisé à l'atterrissage",ph:"KLEERD too LAND"},
+    {en:"Runway in use",fr:"Piste en service",ph:"RUN-way in YOOZ"},
+    {en:"Hold short",fr:"Arrêtez avant la piste",ph:"HOHLD SHORT"},
+    {en:"Line up and wait",fr:"Alignez-vous et attendez",ph:"LYN up and WAYT"},
+    {en:"Go around",fr:"Remise des gaz",ph:"GOH uh-ROWND"},
+    {en:"Continue approach",fr:"Continuez l'approche",ph:"kun-TIN-yoo uh-PROHCH"},
+    {en:"Expedite",fr:"Accélérez",ph:"EK-speh-dyt"},
+    {en:"Wilco",fr:"Compris, j'exécute",ph:"WIL-koh"},
+    {en:"Roger",fr:"Bien reçu",ph:"ROJ-er"},
+    {en:"Affirm",fr:"Affirmatif",ph:"uh-FERM"},
+    {en:"Negative",fr:"Négatif",ph:"NEG-uh-tiv"},
+    {en:"Say again",fr:"Répétez",ph:"SAY uh-GEN"},
+    {en:"Stand by",fr:"Attendez",ph:"STAND BY"},
+    {en:"Correction",fr:"Erreur, je rectifie",ph:"kuh-REK-shun"},
+    {en:"Unable",fr:"Impossible",ph:"un-AY-bl"},
+    {en:"Acknowledge",fr:"Accusez réception",ph:"ak-NOL-ij"},
+    {en:"Readback correct",fr:"Lecture correcte",ph:"REED-bak kuh-REKT"},
   ],
-  "Weather": [
-    { en: "Scattered clouds", fr: "Nuages épars", ph: "SKAT-erd KLOWDZ" },
-    { en: "Visibility ten kilometers", fr: "Visibilité dix km", ph: "viz-ih-BIL-ih-tee TEN" },
-    { en: "Turbulence moderate", fr: "Turbulences modérées", ph: "TUR-byoo-lence MOD-er-it" },
-    { en: "CAVOK", fr: "Conditions VFR optimales", ph: "KAV-oh-KAY" },
-    { en: "Ceiling and visibility OK", fr: "Plafond et visibilité OK", ph: "SEE-ling and viz-ih-BIL-ih-tee" },
+  "Radio Procedures":[
+    {en:"Request taxi",fr:"Demande de roulage",ph:"rih-KWEST TAK-see"},
+    {en:"Request startup",fr:"Demande de mise en route",ph:"rih-KWEST START-up"},
+    {en:"Request pushback",fr:"Demande de repoussage",ph:"rih-KWEST PUSH-bak"},
+    {en:"Request IFR clearance",fr:"Demande clairance IFR",ph:"rih-KWEST EYE-ef-AR KLEER-ence"},
+    {en:"Crossing runway",fr:"Traversée de piste",ph:"KROS-ing RUN-way"},
+    {en:"Backtrack",fr:"Contre-QFU",ph:"BAK-trak"},
+    {en:"Frequency change approved",fr:"Changement de fréquence approuvé",ph:"FREE-kwen-see CHAYNJ uh-PROOVD"},
+    {en:"Contact approach on",fr:"Contactez l'approche sur",ph:"KON-takt uh-PROHCH ON"},
+    {en:"Squawk",fr:"Transpondez",ph:"SKWAWK"},
+    {en:"Ident",fr:"Identification",ph:"EYE-dent"},
+    {en:"How do you read?",fr:"Comment me recevez-vous ?",ph:"HOW doo yoo REED"},
+    {en:"Loud and clear",fr:"Fort et clair",ph:"LOWD and KLEER"},
+    {en:"Radar contact",fr:"Contact radar",ph:"RAY-dar KON-takt"},
+    {en:"Resume own navigation",fr:"Reprenez votre navigation propre",ph:"rih-ZYOOM OHN nav-ih-GAY-shun"},
   ],
-  "Navigation": [
-    { en: "Squawk ident", fr: "Appuyez sur ident", ph: "SKWAWK EYE-dent" },
-    { en: "Report passing", fr: "Signalez le passage", ph: "rih-PORT PAS-ing" },
-    { en: "Maintain flight level", fr: "Maintenez le niveau de vol", ph: "may-TAYN FLYT LEV-el" },
-    { en: "Direct to", fr: "Direct vers", ph: "dih-REKT TOO" },
-    { en: "Descend and maintain", fr: "Descendez et maintenez", ph: "dih-SEND and may-TAYN" },
+  "Navigation":[
+    {en:"Direct to",fr:"Direct vers",ph:"dih-REKT TOO"},
+    {en:"Maintain flight level",fr:"Maintenez le niveau de vol",ph:"may-TAYN FLYT LEV-el"},
+    {en:"Descend and maintain",fr:"Descendez et maintenez",ph:"dih-SEND and may-TAYN"},
+    {en:"Climb and maintain",fr:"Montez et maintenez",ph:"KLYM and may-TAYN"},
+    {en:"Report passing",fr:"Signalez le passage",ph:"rih-PORT PAS-ing"},
+    {en:"Report overhead",fr:"Signalez le survol",ph:"rih-PORT OH-ver-hed"},
+    {en:"Turn left heading",fr:"Virez à gauche cap",ph:"TERN LEFT HED-ing"},
+    {en:"Turn right heading",fr:"Virez à droite cap",ph:"TERN RYT HED-ing"},
+    {en:"Cleared direct",fr:"Autorisé direct",ph:"KLEERD dih-REKT"},
+    {en:"Report established",fr:"Signalez établi",ph:"rih-PORT es-TAB-lisht"},
+    {en:"Position report",fr:"Compte rendu de position",ph:"puh-ZI-shun rih-PORT"},
   ],
-  "Emergency": [
-    { en: "Mayday Mayday Mayday", fr: "Détresse — danger immédiat", ph: "MAY-day MAY-day MAY-day" },
-    { en: "Pan-Pan Pan-Pan Pan-Pan", fr: "Urgence — pas de danger immédiat", ph: "PAN-PAN PAN-PAN PAN-PAN" },
-    { en: "Declare emergency", fr: "Déclarer une urgence", ph: "dih-KLAIR ih-MER-jen-see" },
-    { en: "Minimum fuel", fr: "Carburant minimum", ph: "MIN-ih-mum FYOO-el" },
-    { en: "Request immediate descent", fr: "Demande descente immédiate", ph: "rih-KWEST ih-MEE-dee-it dih-SENT" },
+  "Météo/Weather":[
+    {en:"CAVOK",fr:"Visibilité/nuages OK",ph:"KAV-oh-KAY"},
+    {en:"Scattered clouds",fr:"Nuages épars (3-4 octas)",ph:"SKAT-erd KLOWDZ"},
+    {en:"Broken clouds",fr:"Nuages fragmentés (5-7 octas)",ph:"BROH-ken KLOWDZ"},
+    {en:"Overcast",fr:"Couvert (8 octas)",ph:"OH-ver-kast"},
+    {en:"Few clouds",fr:"Peu de nuages (1-2 octas)",ph:"FYOO KLOWDZ"},
+    {en:"Visibility ten kilometers",fr:"Visibilité 10 km",ph:"viz-ih-BIL-ih-tee TEN"},
+    {en:"Turbulence moderate",fr:"Turbulences modérées",ph:"TUR-byoo-lence MOD-er-it"},
+    {en:"Turbulence severe",fr:"Turbulences sévères",ph:"TUR-byoo-lence suh-VEER"},
+    {en:"Wind shear",fr:"Cisaillement de vent",ph:"WIND SHEER"},
+    {en:"QNH",fr:"Calage altimétrique (niveau mer)",ph:"KYU-en-AYCH"},
+    {en:"QFE",fr:"Pression au sol (terrain)",ph:"KYU-ef-EE"},
+    {en:"Dewpoint",fr:"Point de rosée",ph:"DYOO-poynt"},
+    {en:"Wind calm",fr:"Vent calme",ph:"WIND KAHM"},
+    {en:"Microburst",fr:"Micro-rafale",ph:"MY-kroh-berst"},
+    {en:"Icing conditions",fr:"Conditions de givrage",ph:"EYE-sing kun-DISH-unz"},
+    {en:"Thunderstorm",fr:"Orage",ph:"THUN-der-storm"},
+    {en:"Runway visual range",fr:"Portée visuelle de piste",ph:"RUN-way VIZ-yoo-al RAYNJ"},
+  ],
+  "Emergency":[
+    {en:"Mayday Mayday Mayday",fr:"Détresse (danger immédiat pour la vie)",ph:"MAY-day MAY-day MAY-day"},
+    {en:"Pan-Pan Pan-Pan Pan-Pan",fr:"Urgence (pas danger immédiat)",ph:"PAN-PAN PAN-PAN PAN-PAN"},
+    {en:"Declare emergency",fr:"Déclarer une urgence",ph:"dih-KLAIR ih-MER-jen-see"},
+    {en:"Minimum fuel",fr:"Carburant minimum (information)",ph:"MIN-ih-mum FYOO-el"},
+    {en:"Fuel emergency",fr:"Urgence carburant (MAYDAY)",ph:"FYOO-el ih-MER-jen-see"},
+    {en:"Engine failure",fr:"Panne moteur",ph:"EN-jin FAYL-yer"},
+    {en:"Fire on board",fr:"Feu à bord",ph:"FYR on BORD"},
+    {en:"Medical emergency",fr:"Urgence médicale",ph:"MED-ih-kul ih-MER-jen-see"},
+    {en:"Souls on board",fr:"Âmes à bord",ph:"SOHLZ on BORD"},
+    {en:"Fuel endurance",fr:"Autonomie carburant",ph:"FYOO-el en-DYOOR-ance"},
+    {en:"Squawk 7700",fr:"Urgence générale",ph:"SKWAWK SEV-en SEV-en ZEE-roh ZEE-roh"},
+    {en:"Squawk 7600",fr:"Perte de communications",ph:"SKWAWK SEV-en SIX ZEE-roh ZEE-roh"},
+    {en:"Squawk 7500",fr:"Détournement (hijack)",ph:"SKWAWK SEV-en FYV ZEE-roh ZEE-roh"},
+  ],
+  "Approach/Landing":[
+    {en:"ILS approach",fr:"Approche ILS",ph:"EYE-el-ES uh-PROHCH"},
+    {en:"Visual approach",fr:"Approche à vue",ph:"VIZ-yoo-al uh-PROHCH"},
+    {en:"Established on ILS",fr:"Établi sur ILS",ph:"es-TAB-lisht on EYE-el-ES"},
+    {en:"Glide slope",fr:"Axe de descente électronique",ph:"GLYD SLOHP"},
+    {en:"Decision altitude",fr:"Altitude de décision",ph:"deh-SIZ-hun AL-tih-tood"},
+    {en:"Missed approach",fr:"Approche interrompue",ph:"MIST uh-PROHCH"},
+    {en:"Touch and go",fr:"Atterrissage-décollage enchaîné",ph:"TUCH and GOH"},
+    {en:"Full stop landing",fr:"Atterrissage complet",ph:"FUL STOP LAND-ing"},
+    {en:"Runway vacated",fr:"Piste libérée",ph:"RUN-way vay-KAY-tid"},
+    {en:"Clear of runway",fr:"Dégagé de piste",ph:"KLEER of RUN-way"},
+  ],
+  "Numbers/Codes":[
+    {en:"Niner",fr:"Neuf (9 en radio OACI)",ph:"NY-ner"},
+    {en:"Fife",fr:"Cinq (5 en radio OACI)",ph:"FYF"},
+    {en:"Tree",fr:"Trois (3 en radio OACI)",ph:"TREE"},
+    {en:"Ait",fr:"Huit (8 en radio OACI)",ph:"AYT"},
+    {en:"Flight level one eight zero",fr:"Niveau de vol 180",ph:"FLYT LEV-el WUN AYT ZEE-roh"},
+    {en:"Heading zero niner zero",fr:"Cap 090°",ph:"HED-ing ZEE-roh NY-ner ZEE-roh"},
+    {en:"Frequency one one eight decimal three",fr:"Fréquence 118.3 MHz",ph:"FREE-kwen-see WUN WUN AYT DES-ih-mul TREE"},
+    {en:"Altitude two thousand feet",fr:"Altitude 2000 pieds",ph:"AL-tih-tood TOO THOW-zand FEET"},
   ],
 };
 
-const PHONETICS = ["Alpha","Bravo","Charlie","Delta","Echo","Foxtrot","Golf","Hotel","India","Juliet","Kilo","Lima","Mike","November","Oscar","Papa","Quebec","Romeo","Sierra","Tango","Uniform","Victor","Whiskey","Xray","Yankee","Zulu"];
+const PHONETICS=["Alpha","Bravo","Charlie","Delta","Echo","Foxtrot","Golf","Hotel","India","Juliet","Kilo","Lima","Mike","November","Oscar","Papa","Quebec","Romeo","Sierra","Tango","Uniform","Victor","Whiskey","Xray","Yankee","Zulu"];
 
-const EMERGENCIES = [
-  {
-    title: "Engine Failure After Takeoff",
-    tx: "Mayday Mayday Mayday, Golf Alpha Bravo Charlie Delta, engine failure, request immediate return to [airport], [X] souls on board, [X] hours fuel endurance",
-    tips: ["Répétez Mayday 3 fois", "Précisez âmes à bord", "Donnez l'autonomie carburant", "Squawk 7700"]
-  },
-  {
-    title: "Medical Emergency",
-    tx: "Pan-Pan Pan-Pan Pan-Pan, Golf Alpha Bravo Charlie Delta, medical emergency on board, request priority handling, position [X], altitude [X], [X] souls on board",
-    tips: ["Pan-Pan = urgence (pas danger immédiat)", "Donnez position exacte", "Précisez nombre de personnes affectées", "Restez sur la fréquence"]
-  },
-  {
-    title: "Lost Communication",
-    tx: "If you read Golf Alpha Bravo Charlie Delta, squawk 7600, will proceed [destination] via [route] at [altitude]",
-    tips: ["Squawk 7600 = perte de communications", "Continuez vers destination prévue", "Attendez signaux lumineux en tour de contrôle", "Restez sur plan de vol"]
-  },
+const EMGS=[
+  {title:"Engine Failure After Takeoff",tx:"MAYDAY MAYDAY MAYDAY\n[Airport] Tower, [Callsign]\nEngine failure after takeoff\nRequest immediate return\n[X] souls on board\n[X] hours fuel endurance",tips:["Squawk 7700 immédiatement","Répétez Mayday 3 fois exactement","Donnez les âmes à bord","Précisez l'autonomie carburant","Maintenez la vitesse de plané Vx"]},
+  {title:"Medical Emergency",tx:"PAN-PAN PAN-PAN PAN-PAN\n[Airport] Control, [Callsign]\nMedical emergency on board\nRequest priority handling\nPosition [X], Altitude [X]\n[X] souls on board",tips:["Pan-Pan = urgence sans danger immédiat","Donnez votre position exacte","Restez sur la fréquence","Demandez assistance médicale à l'arrivée"]},
+  {title:"Lost Communication (NORDO)",tx:"[If partial]: Try transmitting blind\nSquawk 7600\nProceed to destination via filed route\nArrive at ETA filed\nLook for light signals at tower",tips:["Squawk 7600 = perte comms","Continuez selon plan de vol","Regardez les signaux lumineux ATC","Surveillez 121.5 MHz"]},
+  {title:"Fuel Emergency",tx:"MAYDAY MAYDAY MAYDAY\n[Airport] Approach, [Callsign]\nFuel emergency\nRequest immediate landing\nEstimated [X] minutes fuel remaining",tips:["'Minimum fuel' = information seulement","'Fuel emergency' = vrai MAYDAY","Précisez les minutes restantes","Demandez la piste la plus proche"]},
+  {title:"Fire On Board",tx:"MAYDAY MAYDAY MAYDAY\n[Airport] Control, [Callsign]\nFire on board\nRequest immediate return\nPosition [X], Altitude [X]\n[X] souls on board",tips:["Suivez les check-lists incendie","Squawk 7700 immédiatement","Choisissez le terrain le plus proche","Ne descendez pas sous la fumée"]},
 ];
 
-const QUESTIONS = [
-  {
-    q: "ATC says: 'Golf-Alpha-Bravo, descend to flight level one-five-zero.' What is the correct readback?",
-    opts: ["Descending to flight level one-five-zero, Golf-Alpha-Bravo", "Roger, Golf-Alpha-Bravo", "Copy that, going down to 150", "Affirm, Golf-Alpha-Bravo"],
-    correct: 0,
-    exp: "Always read back altitude/FL instructions in full with your callsign. 'Roger' alone only confirms receipt — it does NOT confirm compliance."
-  },
-  {
-    q: "What does 'WILCO' mean in aviation radio communication?",
-    opts: ["I have received your message", "I will comply with your instructions", "Wait, I will call you back", "Wind conditions OK"],
-    correct: 1,
-    exp: "WILCO = 'Will Comply'. It implies both receipt AND intent to follow the instruction. Different from 'Roger' which only confirms receipt."
-  },
-  {
-    q: "ATC says: 'Hold short of runway two-seven.' Where do you stop?",
-    opts: ["On the runway threshold", "Before the runway holding position markings (double yellow line)", "At the edge of the apron", "Anywhere before the runway"],
-    correct: 1,
-    exp: "Hold short = stop BEFORE the runway holding position markings. Never enter the runway without explicit clearance — this is a critical safety rule."
-  },
-  {
-    q: "Which squawk code indicates a hijacking?",
-    opts: ["7500", "7600", "7700", "1200"],
-    correct: 0,
-    exp: "7500 = Hijack | 7600 = Lost comms | 7700 = General emergency | 1200 = VFR (USA). Memorize these — they are always tested at ICAO Level 4."
-  },
-  {
-    q: "How do you say the number '9' in ICAO standard phonetics?",
-    opts: ["Nine", "Niner", "Neuf", "Nov"],
-    correct: 1,
-    exp: "'Niner' avoids confusion with the German word 'Nein' (No) on international frequencies. Always use ICAO number pronunciation."
-  },
-  {
-    q: "What is the correct way to read back a frequency assignment of 118.3 MHz?",
-    opts: ["One one eight point three", "118.3", "One-one-eight decimal three", "One-eighteen-three"],
-    correct: 0,
-    exp: "Frequencies are read digit by digit: 'one one eight decimal three'. Always read back frequency assignments in full."
-  },
-  {
-    q: "ATC says 'Roger'. What does this mean?",
-    opts: ["I will comply", "I have received all of your last transmission", "Correct", "Understood, proceed"],
-    correct: 1,
-    exp: "'Roger' = 'I have received all of your last transmission'. It does NOT mean compliance or acknowledgment of understanding."
-  },
-];
-
-// =================== STATE ===================
-let currentModule = 'radio';
-let chatHistory = [];
-let vocabCategory = Object.keys(VOCAB)[0];
-let flipped = {};
-let emgIndex = 0;
-let examIndex = 0;
-let examSelected = null;
-let examScore = 0;
-let examDone = false;
-let apiKey = localStorage.getItem('anthropic_key') || '';
-
-// =================== INIT ===================
-window.onload = () => {
-  updateApiBanner();
-  buildVocab();
-  buildEmergency();
-  buildExam();
+const EXAMS={
+  "Phraséologie":[
+    {q:"ATC dit: 'Descend to flight level one-five-zero.' Readback correct ?",opts:["Descending to flight level one-five-zero, [Callsign]","Roger, [Callsign]","Copy, going down to 150","Affirm, one-five-zero"],correct:0,en:"Always read back altitude/FL instructions in full + callsign. 'Roger' alone is NOT sufficient.",fr:"Lisez toujours les instructions d'altitude en entier avec votre callsign. 'Roger' seul est insuffisant."},
+    {q:"Que signifie 'WILCO' ?",opts:["J'ai reçu votre message","Je vais exécuter vos instructions","Attendez","Wind Conditions OK"],correct:1,en:"WILCO = 'Will Comply'. Implies both receipt AND intent to execute — different from 'Roger'.",fr:"WILCO = Je vais exécuter. Implique la réception ET l'intention d'obéir — différent de 'Roger'."},
+    {q:"Comment dit-on '9' en radiotéléphonie OACI ?",opts:["Nine","Niner","Neuf","Nov"],correct:1,en:"'Niner' avoids confusion with German 'Nein' (No) on international frequencies.",fr:"'Niner' évite la confusion avec l'allemand 'Nein' (Non) sur les fréquences internationales."},
+    {q:"'Roger' signifie uniquement :",opts:["Je vais exécuter","J'ai reçu votre dernier message","Correct","Je comprends et j'exécute"],correct:1,en:"'Roger' ONLY confirms receipt. It does NOT imply compliance. Use 'Wilco' for compliance.",fr:"'Roger' confirme SEULEMENT la réception. N'implique PAS l'exécution. Utilisez 'Wilco' pour exécuter."},
+    {q:"Comment lire la fréquence 118.3 MHz ?",opts:["One one eight decimal three","One-eighteen-three","118.3","One eighteen point three"],correct:0,en:"Frequencies: digit by digit with 'decimal': one one eight decimal three.",fr:"Les fréquences se lisent chiffre par chiffre avec 'décimal': un un huit décimal trois."},
+    {q:"ATC dit 'Say again'. Que dois-tu faire ?",opts:["Répéter ta transmission précédente","Répondre 'Roger'","Changer de fréquence","Demander une confirmation"],correct:0,en:"'Say again' = please repeat your last transmission. Repeat it exactly as before.",fr:"'Say again' = veuillez répéter. Répétez votre transmission précédente telle quelle."},
+    {q:"Comment lit-on le cap 090° ?",opts:["Zero niner zero","Ninety","Zero-ninety","Nine zero"],correct:0,en:"Headings are ALWAYS read as THREE digits: 090 = 'zero niner zero'.",fr:"Les caps se lisent TOUJOURS en TROIS chiffres: 090 = 'zéro niner zéro'."},
+    {q:"Que signifie 'Unable' ?",opts:["Je ne comprends pas","Je ne peux pas exécuter cette instruction","Répétez","En attente"],correct:1,en:"'Unable' = cannot comply with the instruction. Always try to explain why.",fr:"'Unable' = impossible d'exécuter l'instruction. Essayez toujours d'expliquer pourquoi."},
+    {q:"Le 'readback' d'une clairance doit contenir :",opts:["Seulement 'Roger'","Les éléments clés + callsign","Le callsign uniquement","Toute la clairance mot pour mot"],correct:1,en:"Readback must include all key elements (altitude, heading, frequency) + callsign at the end.",fr:"Le readback doit inclure tous les éléments clés (altitude, cap, fréquence) + callsign à la fin."},
+    {q:"'Correction' en radiotéléphonie signifie :",opts:["Il y a une erreur dans votre transmission","J'ai fait une erreur, la version correcte est...","Votre lecture est incorrecte","Recommencez"],correct:1,en:"'Correction' = I made an error in my transmission, and the correct version follows.",fr:"'Correction' = j'ai fait une erreur dans ma transmission, voici la version correcte."},
+  ],
+  "Urgences":[
+    {q:"Quel squawk pour une urgence générale ?",opts:["7500","7600","7700","1200"],correct:2,en:"7700=General emergency | 7600=Lost comms | 7500=Hijack | 1200=VFR(US). Memorize these!",fr:"7700=Urgence générale | 7600=Perte comms | 7500=Détournement | 1200=VFR(USA). Mémorisez !"},
+    {q:"MAYDAY est répété combien de fois ?",opts:["1 fois","2 fois","3 fois","5 fois"],correct:2,en:"MAYDAY is ALWAYS repeated 3 times: 'Mayday Mayday Mayday' — ensures it is heard clearly.",fr:"MAYDAY se répète TOUJOURS 3 fois: 'Mayday Mayday Mayday' — garantit qu'il soit bien entendu."},
+    {q:"Fréquence internationale de détresse ?",opts:["118.300","121.500","123.450","122.800"],correct:1,en:"121.500 MHz = international distress frequency (Guard). Always monitor if possible.",fr:"121.500 MHz = fréquence internationale de détresse (Garde). À surveiller si possible."},
+    {q:"'Minimum fuel' est :",opts:["Une urgence MAYDAY","Une urgence PAN-PAN","Une information pour ATC","Un signal squawk"],correct:2,en:"'Minimum fuel' is only an advisory — NOT an emergency. It tells ATC you cannot accept delays.",fr:"'Minimum fuel' est une information — PAS une urgence. Indique à l'ATC que vous ne pouvez pas accepter de retards."},
+    {q:"Quel squawk pour un détournement ?",opts:["7700","7600","7500","7000"],correct:2,en:"7500 = Unlawful interference/hijack. Set discreetly without informing hijackers.",fr:"7500 = Interférence illicite. À régler discrètement sans en informer les pirates de l'air."},
+    {q:"PAN-PAN est utilisé quand :",opts:["Il y a un danger immédiat pour la vie","Il y a une urgence sans danger immédiat","Le moteur est en feu","Le carburant est épuisé"],correct:1,en:"PAN-PAN = urgent situation requiring assistance but WITHOUT immediate threat to life.",fr:"PAN-PAN = situation urgente nécessitant de l'aide mais SANS danger immédiat pour la vie."},
+    {q:"En cas de perte de communication, vous squawkez :",opts:["7700","7600","7500","2000"],correct:1,en:"7600 = NORDO (No Radio). ATC will try to give you light signals and clear airspace.",fr:"7600 = NORDO (sans radio). L'ATC essaiera de vous donner des signaux lumineux."},
+    {q:"Le message MAYDAY doit inclure :",opts:["Callsign seulement","Nature du problème seulement","Callsign, nature problème, position, intentions, âmes à bord, autonomie","Callsign et position"],correct:2,en:"Complete MAYDAY: Callsign, nature of distress, position, intentions, souls on board, fuel endurance.",fr:"MAYDAY complet: Callsign, nature de la détresse, position, intentions, âmes à bord, autonomie."},
+  ],
+  "Météorologie":[
+    {q:"CAVOK signifie :",opts:["Plafond et visibilité OK","Conditions météo dangereuses","Visibilité nulle","Vent fort"],correct:0,en:"CAVOK = Ceiling And Visibility OK. No cloud below 5000ft, visibility 10km+, no sig. weather.",fr:"CAVOK = Plafond et Visibilité OK. Pas de nuage sous 5000ft, visibilité 10km+, pas de phénomène significatif."},
+    {q:"'Broken' (BKN) = couverture nuageuse de :",opts:["1-2 octas","3-4 octas","5-7 octas","8 octas"],correct:2,en:"BKN = 5-7 oktas. (FEW=1-2, SCT=3-4, BKN=5-7, OVC=8 oktas)",fr:"BKN = 5-7 octas. (FEW=1-2, SCT=3-4, BKN=5-7, OVC=8 octas)"},
+    {q:"QNH est le calage altimétrique donnant :",opts:["L'altitude au niveau de la mer","La hauteur au-dessus du terrain","La pression au sol","La température OAT"],correct:0,en:"QNH = altimeter setting showing altitude above mean sea level (AMSL).",fr:"QNH = calage altimétrique montrant l'altitude au-dessus du niveau moyen de la mer."},
+    {q:"Le wind shear est particulièrement dangereux :",opts:["En croisière haute altitude","En approche et décollage","Sur les pistes sèches","La nuit uniquement"],correct:1,en:"Wind shear on approach/departure causes sudden loss of airspeed. Extremely dangerous phase.",fr:"Le wind shear en approche/décollage cause une perte soudaine de vitesse air. Phase extrêmement dangereuse."},
+    {q:"'SCT' dans un METAR signifie :",opts:["Peu de nuages (1-2 octas)","Nuages épars (3-4 octas)","Couverture fragmentée (5-7 octas)","Couvert (8 octas)"],correct:1,en:"SCT = Scattered = 3-4 oktas of cloud cover.",fr:"SCT = Scattered = nuages épars = 3-4 octas de couverture nuageuse."},
+  ],
+  "Navigation":[
+    {q:"'Hold short of runway 27' = s'arrêter :",opts:["Sur le seuil de la piste 27","Avant les marques d'attente de piste 27","Au bord de l'aire de trafic","N'importe où avant la piste"],correct:1,en:"Hold short = stop BEFORE the runway holding position markings (double yellow lines). Critical!",fr:"Hold short = s'arrêter AVANT les marques d'attente de piste (double ligne jaune). Critique !"},
+    {q:"'Squawk ident' signifie :",opts:["Activer le transpondeur en mode A","Appuyer sur le bouton IDENT du transpondeur","Changer le code squawk","Éteindre le transpondeur"],correct:1,en:"Squawk ident = press the IDENT button, making your aircraft 'bloom' on ATC radar for identification.",fr:"Squawk ident = appuyer sur IDENT, ce qui fait 'fleurir' votre avion sur le radar ATC pour identification."},
+    {q:"'Radar contact' signifie :",opts:["Allumez votre transpondeur","L'ATC vous a identifié sur radar","Changez de fréquence radar","Descendez au niveau radar"],correct:1,en:"Radar contact = ATC has identified your aircraft on radar. Radar service has now commenced.",fr:"Radar contact = l'ATC a identifié votre aéronef sur radar. Le service radar a commencé."},
+    {q:"Un 'position report' doit inclure :",opts:["Callsign et altitude","Callsign, position, altitude, heure, prochain point","Callsign seulement","Position et heure"],correct:1,en:"Position report: callsign, position, time, altitude/FL, next significant point, ETA.",fr:"Compte rendu de position: callsign, position, heure, altitude/NV, prochain point significatif, ETA."},
+  ],
 };
 
-function updateApiBanner() {
-  const banner = document.getElementById('apiBanner');
-  if (apiKey) {
-    banner.style.display = 'none';
-  } else {
-    banner.style.display = 'flex';
-  }
+// ===== STATE =====
+let ak=localStorage.getItem('ak')||'';
+let sessions=JSON.parse(localStorage.getItem('sess')||'{}');
+let curSess=localStorage.getItem('curSess')||'default';
+let avOn=localStorage.getItem('av')!=='false';
+let reOn=localStorage.getItem('re')!=='false';
+let vCat=Object.keys(VOCAB)[0];
+let flipped={};
+let emgI=0;
+let exCat=Object.keys(EXAMS)[0],exI=0,exSel=null,exScore=0,exDone=false;
+let isRec=false,recog=null;
+let cs=localStorage.getItem('cs')||'GOLF-ALPHA-BRAVO-CHARLIE-DELTA';
+let scoreHist=JSON.parse(localStorage.getItem('sh')||'[]');
+
+if(!sessions['default']){sessions['default']={name:'Session par défaut',msgs:[{r:'atc',c:"🎙️ Good evening. Welcome to DIAP Abidjan. I am your ATC controller. State your callsign and request."}],d:new Date().toLocaleDateString('fr-FR')};saveSess();}
+
+window.onload=()=>{updateBanner();renderSess();renderChat();buildVocab();buildEmg();buildExCats();renderExam();updateToggles();document.getElementById('csInp').value=cs;document.getElementById('csLabel').textContent=cs;};
+
+function saveSess(){localStorage.setItem('sess',JSON.stringify(sessions));}
+function saveKey(){const v=document.getElementById('apiKeyInput').value.trim();if(v.startsWith('sk-ant')){ak=v;localStorage.setItem('ak',v);updateBanner();addMsg('atc','✅ Clé API enregistrée ! Simulateur radio IA actif !');}else alert('Clé invalide (doit commencer par sk-ant-)');}
+function sKeySet(){const v=document.getElementById('sKeyInp').value.trim();if(v&&!v.startsWith('•')){ak=v;localStorage.setItem('ak',v);alert('Clé sauvegardée !');}}
+function sKeyDel(){if(confirm('Supprimer la clé API ?')){ak='';localStorage.removeItem('ak');updateBanner();}}
+function updateBanner(){document.getElementById('apiBanner').style.display=ak?'none':'flex';}
+function saveCS(){cs=document.getElementById('csInp').value.trim()||cs;localStorage.setItem('cs',cs);document.getElementById('csLabel').textContent=cs;alert('Callsign sauvegardé !');}
+function clearAll(){localStorage.clear();location.reload();}
+
+function showMod(id,btn){document.querySelectorAll('[id^="mod-"]').forEach(e=>e.style.display='none');document.getElementById('mod-'+id).style.display='block';document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');if(id==='scores')renderScores();}
+
+// SESSIONS
+function renderSess(){
+  const bar=document.getElementById('sessBar');
+  bar.innerHTML=Object.entries(sessions).map(([id,s])=>`<div class="sess-chip ${id===curSess?'active':''}" onclick="switchSess('${id}')">${s.name}${id!=='default'?`<span class="sess-del" onclick="event.stopPropagation();delSess('${id}')">✕</span>`:''}</div>`).join('')+`<button class="new-sess" onclick="openModal()">＋</button>`;
+}
+function switchSess(id){curSess=id;localStorage.setItem('curSess',id);renderSess();renderChat();}
+function openModal(){document.getElementById('modal').style.display='flex';document.getElementById('sNameInp').focus();}
+function closeModal(){document.getElementById('modal').style.display='none';}
+function createSess(){const name=document.getElementById('sNameInp').value.trim()||`Session ${new Date().toLocaleDateString('fr-FR')}`;const id='s'+Date.now();sessions[id]={name,msgs:[{r:'atc',c:`🎙️ New session: "${name}". State callsign and request.`}],d:new Date().toLocaleDateString('fr-FR')};saveSess();closeModal();switchSess(id);document.getElementById('sNameInp').value='';}
+function delSess(id){if(!confirm('Supprimer cette session ?'))return;delete sessions[id];saveSess();if(curSess===id)switchSess('default');else renderSess();}
+function clearSess(){if(!confirm('Effacer les messages ?'))return;sessions[curSess].msgs=[{r:'atc',c:"🎙️ Session cleared. State your callsign and request."}];saveSess();renderChat();}
+
+// CHAT
+function renderChat(){const w=document.getElementById('chatWin');const ms=sessions[curSess]?.msgs||[];w.innerHTML=ms.map(m=>`<div class="msg ${m.r==='user'?'user':'atc'} fi">${m.r==='user'?'<div class="msg-lbl">YOU (PILOT):</div>':'<div class="msg-lbl">🎙️ ATC:</div>'}<div class="bubble">${m.c.replace(/\n/g,'<br>')}</div></div>`).join('');w.scrollTop=w.scrollHeight;}
+function addMsg(role,content){if(!sessions[curSess])return;sessions[curSess].msgs.push({r:role,c:content});saveSess();const w=document.getElementById('chatWin');const d=document.createElement('div');d.className=`msg ${role==='user'?'user':'atc'} fi`;d.innerHTML=`${role==='user'?'<div class="msg-lbl">YOU (PILOT):</div>':'<div class="msg-lbl">🎙️ ATC:</div>'}<div class="bubble">${content.replace(/\n/g,'<br>')}</div>`;w.appendChild(d);w.scrollTop=w.scrollHeight;}
+
+async function send(){
+  const inp=document.getElementById('radioInp'),btn=document.getElementById('txBtn'),txt=inp.value.trim();
+  if(!txt)return;
+  if(!ak){alert('Entrez votre clé API Anthropic.');return;}
+  addMsg('user',txt);inp.value='';btn.disabled=true;
+  const w=document.getElementById('chatWin');const t=document.createElement('div');t.className='typing';t.id='ty';t.textContent='▌ ATC transmitting...';w.appendChild(t);w.scrollTop=w.scrollHeight;
+  const msgs=sessions[curSess].msgs.slice(-20).map(m=>({role:m.r==='atc'?'assistant':'user',content:m.c}));
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':ak,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:900,system:`You are an expert ICAO ATC trainer for a French pilot at DIAP Abidjan. Callsign: ${cs}.
+Respond as REAL ATC (short, precise ICAO phraseology), then add a French coaching note in parentheses:
+✅ Ce qui était correct | ❌ Erreurs + correction exacte | 📝 Phrase ICAO parfaite | 🎯 Niveau OACI estimé: X/6
+Progress through: startup→taxi→takeoff→departure→cruise→arrival→landing`,messages:msgs.slice(-19)})});
+    const data=await res.json();const reply=data.content?.[0]?.text||'No response.';
+    document.getElementById('ty')?.remove();addMsg('atc',reply);
+    if(avOn)speakATC(reply.split('(')[0].trim());
+  }catch(e){document.getElementById('ty')?.remove();addMsg('atc','⚠️ Erreur connexion. Vérifiez votre clé API.');}
+  btn.disabled=false;
 }
 
-function saveKey() {
-  const val = document.getElementById('apiKeyInput').value.trim();
-  if (val.startsWith('sk-ant')) {
-    apiKey = val;
-    localStorage.setItem('anthropic_key', val);
-    updateApiBanner();
-    addMessage('atc', '✅ Clé API enregistrée ! Le simulateur radio IA est maintenant actif. Bonne session d\'entraînement !');
-  } else {
-    alert('Clé invalide. Elle doit commencer par sk-ant-...');
-  }
+// MIC
+function toggleMic(){
+  if(!('webkitSpeechRecognition'in window||'SpeechRecognition'in window)){alert('Reconnaissance vocale: Chrome uniquement.');return;}
+  if(isRec){recog?.stop();return;}
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;recog=new SR();recog.lang='en-US';recog.continuous=false;recog.interimResults=false;
+  recog.onstart=()=>{isRec=true;const b=document.getElementById('micBtn');b.classList.add('rec');b.textContent='⏹';};
+  recog.onresult=e=>{document.getElementById('radioInp').value=e.results[0][0].transcript;};
+  recog.onend=recog.onerror=()=>{isRec=false;const b=document.getElementById('micBtn');b.classList.remove('rec');b.textContent='🎤';};
+  recog.start();
 }
 
-// =================== MODULE NAV ===================
-function showModule(id, btn) {
-  document.querySelectorAll('[id^="module-"]').forEach(el => el.style.display = 'none');
-  document.getElementById('module-' + id).style.display = 'block';
-  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
+// VOICE OUT
+function speakATC(text){if(!avOn)return;const s=window.speechSynthesis;s.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='en-US';u.rate=0.95;u.pitch=0.85;const vs=s.getVoices();const mv=vs.find(v=>v.lang.startsWith('en')&&(v.name.includes('Daniel')||v.name.includes('Alex')||v.name.includes('David')||v.name.includes('Male')));if(mv)u.voice=mv;s.speak(u);}
+function toggleAV(){avOn=!avOn;localStorage.setItem('av',avOn);updateToggles();}
+function toggleRE(){reOn=!reOn;localStorage.setItem('re',reOn);updateToggles();}
+function updateToggles(){document.getElementById('avTog').className='toggle'+(avOn?' on':'');document.getElementById('reTog').className='toggle'+(reOn?' on':'');}
+
+// VOCAB
+function buildVocab(){
+  const tabs=document.getElementById('catTabs');
+  tabs.innerHTML=Object.keys(VOCAB).map(c=>`<button class="cat-tab ${c===vCat?'active':''}" onclick="switchVC('${c}',this)">${c.toUpperCase()}</button>`).join('')+`<button class="cat-tab" onclick="switchVC('ALL',this)">✈️ ALL</button>`;
+  renderVocab();
+  document.getElementById('phList').innerHTML=PHONETICS.map((w,i)=>`<span class="ph-item"><span class="l">${String.fromCharCode(65+i)}</span>=${w}</span>`).join('');
 }
-
-// =================== RADIO ===================
-function addMessage(role, content) {
-  const window = document.getElementById('chatWindow');
-  const div = document.createElement('div');
-  div.className = `msg ${role === 'user' ? 'user' : 'atc'} fade-in`;
-  div.innerHTML = `
-    ${role === 'user' ? '<div class="msg-label">YOU (PILOT):</div>' : '<div class="msg-label">🎙️ ATC:</div>'}
-    <div class="bubble">${content.replace(/\n/g, '<br>')}</div>
-  `;
-  window.appendChild(div);
-  window.scrollTop = window.scrollHeight;
+function switchVC(c,btn){vCat=c;flipped={};document.querySelectorAll('.cat-tab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderVocab();}
+function renderVocab(){
+  const s=document.getElementById('vSearch').value.toLowerCase();
+  let items=vCat==='ALL'?Object.values(VOCAB).flat():(VOCAB[vCat]||[]);
+  if(s)items=Object.values(VOCAB).flat().filter(i=>i.en.toLowerCase().includes(s)||i.fr.toLowerCase().includes(s));
+  document.getElementById('vCount').textContent=`${items.length} terme(s) — Cliquez pour révéler`;
+  document.getElementById('vGrid').innerHTML=items.map((item,i)=>`<div class="v-card ${flipped[i]?'flipped':''}" onclick="flipC(${i})">${!flipped[i]?`<div class="c-lbl">🇬🇧 ENGLISH</div><div class="c-en">${item.en}</div><div class="c-hint">→ Tap pour révéler</div>`:`<div class="c-lbl">🇫🇷 FRANÇAIS</div><div class="c-fr">${item.fr}</div><div class="c-lbl" style="margin-top:6px">🔊 PRONUNCIATION</div><div class="c-ph">[${item.ph}]</div>`}</div>`).join('');
 }
+function flipC(i){flipped[i]=!flipped[i];renderVocab();}
 
-async function sendMessage() {
-  const input = document.getElementById('radioInput');
-  const btn = document.getElementById('txBtn');
-  const text = input.value.trim();
-  if (!text) return;
+// EMERGENCY
+function buildEmg(){document.getElementById('emgTabs').innerHTML=EMGS.map((e,i)=>`<button class="emg-tab ${i===emgI?'active':''}" onclick="switchEmg(${i},this)">${e.title.slice(0,16).toUpperCase()}...</button>`).join('');renderEmg();}
+function switchEmg(i,btn){emgI=i;document.querySelectorAll('.emg-tab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderEmg();}
+function renderEmg(){const e=EMGS[emgI];document.getElementById('emgContent').innerHTML=`<div class="emg-box scen"><div class="e-lbl">📋 SCENARIO</div><div class="e-title">${e.title}</div></div><div class="emg-box main"><div class="e-lbl">🎙️ STANDARD TRANSMISSION</div><div class="e-text">${e.tx.replace(/\n/g,'<br>')}</div></div><div class="tips-grid">${e.tips.map(t=>`<div class="tip">✓ ${t}</div>`).join('')}</div>`;}
 
-  if (!apiKey) {
-    alert('Veuillez entrer votre clé API Anthropic en haut de la page.');
-    return;
-  }
-
-  addMessage('user', text);
-  chatHistory.push({ role: 'user', content: text });
-  input.value = '';
-  btn.disabled = true;
-  btn.textContent = '...';
-
-  // Typing indicator
-  const chatWin = document.getElementById('chatWindow');
-  const typing = document.createElement('div');
-  typing.className = 'typing blink';
-  typing.id = 'typingIndicator';
-  typing.textContent = '▌ ATC transmitting...';
-  chatWin.appendChild(typing);
-  chatWin.scrollTop = chatWin.scrollHeight;
-
-  try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 800,
-        system: `You are an ICAO-certified ATC trainer for a French student pilot preparing for ICAO Level 4 Aviation English exam.
-
-Rules:
-- Act as a realistic ATC controller at DIAP (Abidjan Airport, Côte d'Ivoire)
-- Student callsign: Golf-Alpha-Bravo-Charlie-Delta (small GA aircraft)
-- Respond ONLY as real ATC: short, precise, standard ICAO phraseology
-- After each ATC transmission, add a brief coaching note in French in parentheses (coaching: what was good, what to improve, correct ICAO phrase if needed)
-- Progress through realistic flight: taxi → takeoff → departure → en route → arrival → landing
-- Correct errors gently with proper phrasing
-- Keep ATC transmissions realistic and short`,
-        messages: chatHistory
-      })
-    });
-
-    const data = await res.json();
-    const reply = data.content?.[0]?.text || 'No response from ATC.';
-    chatHistory.push({ role: 'assistant', content: reply });
-
-    document.getElementById('typingIndicator')?.remove();
-    addMessage('atc', reply);
-  } catch (e) {
-    document.getElementById('typingIndicator')?.remove();
-    addMessage('atc', '⚠️ Erreur de connexion. Vérifiez votre clé API et réessayez.');
-  }
-
-  btn.disabled = false;
-  btn.textContent = 'TRANSMIT →';
+// EXAM
+function buildExCats(){document.getElementById('examCats').innerHTML=Object.keys(EXAMS).map(c=>`<button class="exam-cat ${c===exCat?'active':''}" onclick="switchExC('${c}',this)">${c.toUpperCase()}</button>`).join('');}
+function switchExC(c,btn){exCat=c;exI=0;exSel=null;exScore=0;exDone=false;document.querySelectorAll('.exam-cat').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderExam();}
+function renderExam(){
+  const qs=EXAMS[exCat],box=document.getElementById('examBox');
+  if(exDone){const pct=Math.round(exScore/qs.length*100);const em=pct>=80?'🏆':pct>=60?'✈️':'📚';const msg=pct>=80?'Excellent ! Niveau 4 en vue !':pct>=60?'Bon travail, continue !':'Continue à réviser !';saveSc(exCat,exScore,qs.length);box.innerHTML=`<div class="result-box"><div class="r-emoji">${em}</div><div class="r-score">${exScore}/${qs.length} — ${pct}%</div><div class="r-msg">${msg}</div><div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;"><button class="btn btn-g" onclick="restartEx()">RECOMMENCER</button><button class="btn btn-b" onclick="showMod('scores',document.querySelectorAll('nav button')[4])">VOIR SCORES</button></div></div>`;return;}
+  const q=qs[exI];const pct2=(exI/qs.length)*100;
+  box.innerHTML=`<div class="exam-meta"><span>Q${exI+1}/${qs.length} — ${exCat}</span><span>Score: ${exScore}</span></div><div class="prog-bar"><div class="prog-fill" style="width:${pct2}%"></div></div><div class="exam-q">${q.q}</div><div class="options">${q.opts.map((o,i)=>{let c='option';if(exSel!==null){if(i===q.correct)c+=' correct';else if(i===exSel&&i!==q.correct)c+=' wrong';}return`<button class="${c}" ${exSel!==null?'disabled':''} onclick="selAns(${i})"><span class="opt-l">${['A','B','C','D'][i]}.</span>${o}</button>`;}).join('')}</div>${exSel!==null?`<div class="expl"><div class="exp-lbl">🇬🇧 EXPLANATION</div><div class="exp-en">${q.en}</div><div class="exp-lbl">🇫🇷 EXPLICATION</div><div class="exp-fr">${q.fr}</div></div><button class="next-btn" onclick="nextQ()">${exI+1>=qs.length?'VOIR RÉSULTATS →':'QUESTION SUIVANTE →'}</button>`:''}`;
 }
+function selAns(i){if(exSel!==null)return;exSel=i;if(i===EXAMS[exCat][exI].correct)exScore++;renderExam();}
+function nextQ(){exI++;exSel=null;if(exI>=EXAMS[exCat].length)exDone=true;renderExam();}
+function restartEx(){exI=0;exSel=null;exScore=0;exDone=false;renderExam();}
 
-// =================== VOCAB ===================
-function buildVocab() {
-  const tabs = document.getElementById('catTabs');
-  tabs.innerHTML = Object.keys(VOCAB).map(cat =>
-    `<button class="cat-tab ${cat === vocabCategory ? 'active' : ''}" onclick="switchCat('${cat}', this)">${cat.toUpperCase()}</button>`
-  ).join('');
-  renderVocabGrid();
-
-  const pl = document.getElementById('phoneticList');
-  pl.innerHTML = PHONETICS.map((w, i) =>
-    `<span class="phonetic-item"><span class="letter">${String.fromCharCode(65+i)}</span>=${w}</span>`
-  ).join('');
-}
-
-function switchCat(cat, btn) {
-  vocabCategory = cat;
-  flipped = {};
-  document.querySelectorAll('.cat-tab').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  renderVocabGrid();
-}
-
-function renderVocabGrid() {
-  const grid = document.getElementById('vocabGrid');
-  grid.innerHTML = VOCAB[vocabCategory].map((item, i) => `
-    <div class="vocab-card ${flipped[i] ? 'flipped' : ''}" onclick="flipCard(${i})">
-      ${!flipped[i] ? `
-        <div class="card-label">🇬🇧 ENGLISH</div>
-        <div class="card-main">${item.en}</div>
-        <div class="card-hint">→ Tap to reveal</div>
-      ` : `
-        <div class="card-label">🇫🇷 FRANÇAIS</div>
-        <div class="card-sub">${item.fr}</div>
-        <div class="card-label" style="margin-top:10px">🔊 PRONUNCIATION</div>
-        <div class="card-phonetic">[${item.ph}]</div>
-      `}
-    </div>
-  `).join('');
-}
-
-function flipCard(i) {
-  flipped[i] = !flipped[i];
-  renderVocabGrid();
-}
-
-// =================== EMERGENCY ===================
-function buildEmergency() {
-  const tabs = document.getElementById('emgTabs');
-  tabs.innerHTML = EMERGENCIES.map((e, i) =>
-    `<button class="emg-tab ${i === emgIndex ? 'active' : ''}" onclick="switchEmg(${i}, this)">${e.title.toUpperCase().slice(0,20)}...</button>`
-  ).join('');
-  renderEmg();
-}
-
-function switchEmg(i, btn) {
-  emgIndex = i;
-  document.querySelectorAll('.emg-tab').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  renderEmg();
-}
-
-function renderEmg() {
-  const e = EMERGENCIES[emgIndex];
-  document.getElementById('emgContent').innerHTML = `
-    <div class="emg-scenario">
-      <div class="emg-label">📋 SCENARIO</div>
-      <div class="emg-title">${e.title}</div>
-    </div>
-    <div class="emg-transmission">
-      <div class="emg-label">🎙️ STANDARD TRANSMISSION</div>
-      <div class="emg-text">${e.tx}</div>
-    </div>
-    <div class="tips-grid">
-      ${e.tips.map(t => `<div class="tip">✓ ${t}</div>`).join('')}
-    </div>
-  `;
-}
-
-// =================== EXAM ===================
-function buildExam() { renderExam(); }
-
-function renderExam() {
-  const container = document.getElementById('examContainer');
-  if (examDone) {
-    const emoji = examScore >= 6 ? '🏆' : examScore >= 4 ? '✈️' : '📚';
-    const msg = examScore >= 6 ? 'Excellent ! Niveau 4 en vue !' : examScore >= 4 ? 'Bon travail, continue à pratiquer !' : 'Continue à réviser, tu y arriveras !';
-    container.innerHTML = `
-      <div class="result-box">
-        <div class="result-emoji">${emoji}</div>
-        <div class="result-score">${examScore} / ${QUESTIONS.length}</div>
-        <div class="result-msg">${msg}</div>
-        <button class="restart-btn" onclick="restartExam()">RECOMMENCER →</button>
-      </div>
-    `;
-    return;
-  }
-
-  const q = QUESTIONS[examIndex];
-  const pct = (examIndex / QUESTIONS.length) * 100;
-  container.innerHTML = `
-    <div class="exam-meta">
-      <span>Question ${examIndex + 1} / ${QUESTIONS.length}</span>
-      <span>Score: ${examScore} pts</span>
-    </div>
-    <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
-    <div class="exam-q">${q.q}</div>
-    <div class="options">
-      ${q.opts.map((opt, i) => {
-        let cls = 'option';
-        if (examSelected !== null) {
-          if (i === q.correct) cls += ' correct';
-          else if (i === examSelected && i !== q.correct) cls += ' wrong';
-        }
-        return `<button class="${cls}" ${examSelected !== null ? 'disabled' : ''} onclick="selectAnswer(${i})">
-          <span class="opt-letter">${['A','B','C','D'][i]}.</span>${opt}
-        </button>`;
-      }).join('')}
-    </div>
-    ${examSelected !== null ? `
-      <div class="explanation">💡 <strong>Explication:</strong> ${q.exp}</div>
-      <button class="next-btn" onclick="nextQuestion()">
-        ${examIndex + 1 >= QUESTIONS.length ? 'VOIR RÉSULTATS →' : 'QUESTION SUIVANTE →'}
-      </button>
-    ` : ''}
-  `;
-}
-
-function selectAnswer(i) {
-  if (examSelected !== null) return;
-  examSelected = i;
-  if (i === QUESTIONS[examIndex].correct) examScore++;
-  renderExam();
-}
-
-function nextQuestion() {
-  examIndex++;
-  examSelected = null;
-  if (examIndex >= QUESTIONS.length) examDone = true;
-  renderExam();
-}
-
-function restartExam() {
-  examIndex = 0; examSelected = null; examScore = 0; examDone = false;
-  renderExam();
+// SCORES
+function saveSc(cat,score,total){scoreHist.unshift({cat,score,total,pct:Math.round(score/total*100),date:new Date().toLocaleDateString('fr-FR'),time:new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})});if(scoreHist.length>60)scoreHist.pop();localStorage.setItem('sh',JSON.stringify(scoreHist));}
+function renderScores(){
+  const box=document.getElementById('scoresBox');
+  if(!scoreHist.length){box.innerHTML='<div style="color:var(--dim);font-size:11px;padding:20px;">Aucun score enregistré. Complète un examen !</div>';return;}
+  const avg=Math.round(scoreHist.reduce((a,s)=>a+s.pct,0)/scoreHist.length);const best=Math.max(...scoreHist.map(s=>s.pct));
+  box.innerHTML=`<div style="padding:14px;background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;margin-bottom:14px;display:flex;gap:18px;flex-wrap:wrap;">
+    <div><div style="font-size:8px;color:var(--dim);letter-spacing:2px;">MOYENNE</div><div style="font-size:26px;color:var(--green);font-family:'Orbitron',monospace;">${avg}%</div></div>
+    <div><div style="font-size:8px;color:var(--dim);letter-spacing:2px;">EXAMENS</div><div style="font-size:26px;color:var(--blu);font-family:'Orbitron',monospace;">${scoreHist.length}</div></div>
+    <div><div style="font-size:8px;color:var(--dim);letter-spacing:2px;">MEILLEUR</div><div style="font-size:26px;color:var(--ora);font-family:'Orbitron',monospace;">${best}%</div></div>
+  </div>
+  ${scoreHist.map(s=>`<div class="score-item"><span>${s.date} ${s.time} — <span style="color:var(--blu)">${s.cat}</span></span><span style="color:${s.pct>=80?'var(--green)':s.pct>=60?'var(--ora)':'var(--red)'}">${s.score}/${s.total} (${s.pct}%)</span></div>`).join('')}
+  <button class="btn btn-r" style="margin-top:12px;" onclick="if(confirm('Effacer ?')){scoreHist=[];localStorage.setItem('sh','[]');renderScores();}">EFFACER HISTORIQUE</button>`;
 }
 </script>
 </body>
